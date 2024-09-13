@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile
+from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
 from sqlalchemy.orm import Session
 from . import crud, models, schemas, auth
 from .database import engine, get_db
@@ -19,14 +19,28 @@ async def startup_event():
         crud.create_admin_user(db, admin_username, admin_password)
 
 @app.post("/images", response_model=schemas.Image)
-def create_image(
-    image: schemas.ImageCreate,
+async def create_image(
+    file: UploadFile = File(...),
+    description: str = Form(...),
+    author: str = Form(...),
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
     if not current_user.is_admin:
-        raise HTTPException(status_code=403, detail="Only admins can upload images")
-    return crud.create_image(db=db, image=image)
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Save the uploaded file
+    file_location = f"uploads/{file.filename}"
+    with open(file_location, "wb+") as file_object:
+        shutil.copyfileobj(file.file, file_object)
+    
+    # Create image in database
+    image_data = schemas.ImageCreate(
+        filename=file.filename,
+        description=description,
+        author=author
+    )
+    return crud.create_image(db, image_data)
 
 @app.post("/register", response_model=schemas.User)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):

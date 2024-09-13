@@ -17,6 +17,7 @@ class User(BaseModel):
 class ImageCreate(BaseModel):
     filename: str
     description: str
+    author: str
 
 class Image(ImageCreate):
     id: int

@@ -18,6 +18,7 @@ class Image(Base):
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String, index=True)
     description = Column(String)
+    author = Column(String)
 
     audios = relationship("Audio", back_populates="image")
 
