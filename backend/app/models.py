@@ -18,6 +18,7 @@ class Image(Base):
     id = Column(Integer, primary_key=True, index=True)
     url = Column(String, index=True)
     description = Column(String)
+    title = Column(String)
     description_page = Column(String)
     author = Column(String)
 

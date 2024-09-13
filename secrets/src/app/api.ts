@@ -1,5 +1,14 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+interface ImageDetails {
+    id: number;
+    url: string;
+    title: string;
+    description: string;
+    author: string;
+}
+
+
 export const login = async (username: string, password: string) => {
     const response = await fetch(`${API_URL}/token`, {
         method: 'POST',
@@ -42,10 +51,23 @@ export const fetchAudio = async (image_id: number) => {
 
     if (response.status === 404) {
         throw new Error('Could not find any image with this id');
-      }
+    }
     if (!response.ok) throw new Error('Network response was not ok');
 
     return response.json();
 };
 
-// Add more API calls as needed
+export async function fetchImage(id: number): Promise<ImageDetails> {
+    const response = await fetch(`${API_URL}/images/${id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch image details');
+    }
+
+    return response.json();
+}
