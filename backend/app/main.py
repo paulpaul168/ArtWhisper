@@ -28,21 +28,24 @@ async def startup_event():
     if not existing_admin:
         crud.create_admin_user(db, admin_username, admin_password)
 
-@app.post("/images", response_model=schemas.Image)
+@app.post("/images/{image_id}", response_model=schemas.Image)
 async def create_image(
+    image_id: int,
     image: schemas.ImageCreate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
     """
-    Internal: Create a new image entry.
+    Internal: Create a new image entry with a specific ID.
 
+    - **image_id**: The ID to use for the new image
     - **image**: Image data including URL, title, description, description page URL, and author
     """
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Not authorized")
     
-    return crud.create_image(db, image)
+    return crud.create_image(db, image, image_id)
+
 
 @app.post("/register", response_model=schemas.User)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):

@@ -19,7 +19,7 @@ class ImageCreate(BaseModel):
     title: str  
     description: str
     description_page: str 
-    author: str
+    artist: str
 
 class Image(ImageCreate):
     id: int

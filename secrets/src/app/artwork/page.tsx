@@ -28,7 +28,7 @@ interface ImageDetails {
     url: string;
     title: string;
     description: string;
-    author: string;
+    artist: string;
 }
 
 export default function ArtworkPage() {
@@ -71,7 +71,7 @@ export default function ArtworkPage() {
             <Card className="w-full mb-8">
                 <CardHeader>
                     <CardTitle className="text-xl sm:text-2xl">{imageDetails.title}</CardTitle>
-                    <CardDescription className="text-sm sm:text-base">by {imageDetails.author}</CardDescription>
+                    <CardDescription className="text-sm sm:text-base">by {imageDetails.artist}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <img src={imageDetails.url} alt={imageDetails.title} className="w-full h-auto mb-4 rounded-lg" />

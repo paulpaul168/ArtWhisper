@@ -43,21 +43,21 @@ def add_example_data():
                 title="Mona Lisa",
                 description="The Mona Lisa is an oil painting by Italian artist, inventor, and writer Leonardo da Vinci. Likely completed in 1506, the piece features a portrait of a seated woman set against an imaginary landscape.",
                 description_page="https://en.wikipedia.org/wiki/Mona_Lisa",
-                author="Leonardo da Vinci"
+                artist="Leonardo da Vinci"
             ),
             Image(
                 url="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1200px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
                 title="The Starry Night",
                 description="The Starry Night is an oil-on-canvas painting by the Dutch Post-Impressionist painter Vincent van Gogh. Painted in June 1889, it depicts the view from the east-facing window of his asylum room at Saint-Rémy-de-Provence, just before sunrise, with the addition of an imaginary village.",
                 description_page="https://en.wikipedia.org/wiki/The_Starry_Night",
-                author="Vincent van Gogh"
+                artist="Vincent van Gogh"
             ),
             Image(
                 url="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Scream.jpg/1200px-The_Scream.jpg",
                 title="The Scream",
                 description="The Scream is the popular name given to a composition created by Norwegian Expressionist artist Edvard Munch in 1893. The agonized face in the painting has become one of the most iconic images of art, seen as symbolizing the anxiety of the human condition.",
                 description_page="https://en.wikipedia.org/wiki/The_Scream",
-                author="Edvard Munch"
+                artist="Edvard Munch"
             )
         ]
 

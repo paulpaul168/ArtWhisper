@@ -5,7 +5,7 @@ interface ImageDetails {
     url: string;
     title: string;
     description: string;
-    author: string;
+    artist: string;
 }
 
 

@@ -19,8 +19,8 @@ def create_admin_user(db: Session, username: str, password: str):
     admin_user = schemas.UserCreate(username=username, password=password, is_admin=True)
     return create_user(db, admin_user)
 
-def create_image(db: Session, image: schemas.ImageCreate):
-    db_image = models.Image(**image.dict())
+def create_image(db: Session, image: schemas.ImageCreate, image_id: int):
+    db_image = models.Image(id=image_id, **image.dict())
     db.add(db_image)
     db.commit()
     db.refresh(db_image)
