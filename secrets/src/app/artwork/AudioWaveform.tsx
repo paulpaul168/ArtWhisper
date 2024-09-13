@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Play, Pause } from 'lucide-react';
+import { getAudio, getAudioUrl } from '../api';
 
-const AudioWaveform = ({ audioUrl }: { audioUrl: string }) => {
+const AudioWaveform = ({ audioId }: { audioId: number }) => {
     const canvasRef = useRef(null);
     const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -12,15 +13,16 @@ const AudioWaveform = ({ audioUrl }: { audioUrl: string }) => {
 
     useEffect(() => {
         const fetchAudio = async () => {
-            const response = await fetch(audioUrl);
-            const arrayBuffer = await response.arrayBuffer();
-            const audioContext = new ((window as any).AudioContext || (window as any).webkitAudioContext)();
+            const response = await getAudio(Number(audioId));
+            const blob = await response;
+            const arrayBuffer = await blob.arrayBuffer();
+            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
             const buffer = await audioContext.decodeAudioData(arrayBuffer);
             setAudioBuffer(buffer);
         };
 
         fetchAudio();
-    }, [audioUrl]);
+    }, [audioId]);
 
     useEffect(() => {
         if (audioBuffer && canvasRef.current) {
@@ -80,7 +82,7 @@ const AudioWaveform = ({ audioUrl }: { audioUrl: string }) => {
                     {isPlaying ? <Pause size={24} /> : <Play size={24} />}
                 </button>
             </div>
-            <audio ref={audioRef} src={audioUrl} />
+            <audio ref={audioRef} src={getAudioUrl(audioId)} />
         </div>
     );
 };

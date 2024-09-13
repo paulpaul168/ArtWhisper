@@ -14,6 +14,7 @@ import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react';
 import { getAudioForArtwork, getImageForArtwork } from "../api";
 import { AudioRecordButton } from "@/components/audioRecordingButton";
+import AudioWaveform from './AudioWaveform';
 
 interface AudioElement {
     id: number;
@@ -87,6 +88,7 @@ export default function ArtworkPage() {
                     {audioElements.map(audioElement => (
                         <Card key={audioElement.id} className="flex flex-row items-center justify-between w-full p-3 sm:p-4">
                             <span className="text-sm sm:text-base">Audio Recording {audioElement.id}</span>
+                            <AudioWaveform audioId={audioElement.id} />
                             <Button
                                 className="w-12 h-12 sm:w-14 sm:h-14 rounded-full p-0"
                                 size="icon"

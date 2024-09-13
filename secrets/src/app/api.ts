@@ -71,3 +71,22 @@ export async function getImageForArtwork(id: number): Promise<ImageDetails> {
 
     return response.json();
 }
+
+export async function getAudio(id: number): Promise<Blob> {
+    const response = await fetch(`${API_URL}/audio/${id}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'audio/*',
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch audio file');
+    }
+
+    return response.blob();
+}
+
+export function getAudioUrl(id: number): string {
+    return `${API_URL}/audio/${id}`;
+}
