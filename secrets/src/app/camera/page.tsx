@@ -3,7 +3,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 
 export default function CameraPage() {
 

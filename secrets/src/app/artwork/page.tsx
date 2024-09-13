@@ -12,7 +12,8 @@ import {
 import { Play } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react';
-import { fetchAudio, fetchImage } from "../api";
+import { getAudioForArtwork, getImageForArtwork } from "../api";
+import { AudioRecordButton } from "@/components/audioRecordingButton";
 
 interface AudioElement {
     id: number;
@@ -42,7 +43,7 @@ export default function ArtworkPage() {
     useEffect(() => {
         if (image_id) {
             const id = parseInt(image_id);
-            Promise.all([fetchImage(id), fetchAudio(id)])
+            Promise.all([getImageForArtwork(id), getAudioForArtwork(id)])
                 .then(([imageData, audioData]) => {
                     setImageDetails(imageData);
                     setAudioElements(audioData);
@@ -54,6 +55,12 @@ export default function ArtworkPage() {
                 });
         }
     }, [image_id]);
+
+    const handleRecordingComplete = (blob: Blob) => {
+        // Here you would typically upload the blob to your server
+        console.log('Recording completed, blob size:', blob.size);
+        // You might want to add the new recording to audioElements here
+    };
 
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
@@ -90,6 +97,9 @@ export default function ArtworkPage() {
                     ))}
                 </div>
             )}
+            <div className="m-8">
+            <AudioRecordButton onRecordingComplete={handleRecordingComplete} />
+            </div>
         </div>
     )
 }

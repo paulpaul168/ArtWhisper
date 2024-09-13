@@ -41,7 +41,7 @@ export const register = async (username: string, password: string) => {
     return response.json();
 };
 
-export const fetchAudio = async (image_id: number) => {
+export const getAudioForArtwork = async (image_id: number) => {
     const response = await fetch(`${API_URL}/image/${image_id}/audios`, {
         method: 'GET',
         headers: {
@@ -57,7 +57,7 @@ export const fetchAudio = async (image_id: number) => {
     return response.json();
 };
 
-export async function fetchImage(id: number): Promise<ImageDetails> {
+export async function getImageForArtwork(id: number): Promise<ImageDetails> {
     const response = await fetch(`${API_URL}/images/${id}`, {
         method: 'GET',
         headers: {
