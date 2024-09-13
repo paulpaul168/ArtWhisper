@@ -6,16 +6,10 @@ const nextConfig = {
                 source: '/',
                 destination: '/camera',
                 permanent: false,
-                has: [
-                    {
-                        type: 'cookie',
-                        key: 'authToken',
-                    },
-                ],
             },
             {
-                source: '/',
-                destination: '/auth',
+                source: '/auth',
+                destination: '/camera',
                 permanent: false,
                 missing: [
                     {
