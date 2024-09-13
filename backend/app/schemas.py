@@ -15,8 +15,10 @@ class User(BaseModel):
         from_attributes = True
 
 class ImageCreate(BaseModel):
-    filename: str
+    url: str
+    title: str  
     description: str
+    description_page: str 
     author: str
 
 class Image(ImageCreate):
