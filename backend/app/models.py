@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, func
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -28,6 +28,7 @@ class Audio(Base):
     filename = Column(String, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     image_id = Column(Integer, ForeignKey("images.id"))
+    created_at = Column(DateTime, default=func.now())
 
     user = relationship("User", back_populates="audios")
     image = relationship("Image", back_populates="audios")
