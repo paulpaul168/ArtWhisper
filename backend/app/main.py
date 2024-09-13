@@ -74,10 +74,6 @@ def get_audio(image_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Audio not found")
     return {"audio_filename": image.audio_filename}
 
-@app.post("/images", response_model=schemas.Image)
-def create_image(image: schemas.ImageCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    return crud.create_image(db=db, image=image)
-
 @app.get("/images/{image_id}", response_model=schemas.Image)
 def get_image(image_id: int, db: Session = Depends(get_db)):
     db_image = crud.get_image(db, image_id=image_id)
