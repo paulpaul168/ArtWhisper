@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
+from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from . import crud, models, schemas, auth
@@ -112,8 +112,20 @@ def get_audio(audio_id: int, db: Session = Depends(get_db)):
     return audio
 
 @app.get("/image/{image_id}/audios", response_model=list[schemas.Audio])
-def get_audios_for_image(image_id: int, db: Session = Depends(get_db)):
-    return crud.get_audios_for_image(db, image_id=image_id)
+def get_audios_for_image(
+    image_id: int, 
+    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100)
+):
+    """
+    Retrieve audios for a specific image with pagination.
+
+    - **image_id**: ID of the image to get audios for
+    - **skip**: Number of audios to skip (for pagination)
+    - **limit**: Maximum number of audios to return (for pagination)
+    """
+    return crud.get_audios_for_image(db, image_id=image_id, skip=skip, limit=limit)
 
 @app.get("/user/audios", response_model=list[schemas.Audio])
 def get_user_audios(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
