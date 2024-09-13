@@ -20,7 +20,7 @@ class Image(Base):
     description = Column(String)
     title = Column(String)
     description_page = Column(String)
-    author = Column(String)
+    artist = Column(String)
 
     audios = relationship("Audio", back_populates="image")
 
