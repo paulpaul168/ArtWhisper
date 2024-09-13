@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
 from sqlalchemy.orm import Session
 from . import crud, models, schemas, auth
+from datetime import datetime
 from .database import engine, get_db
 import shutil
 import os
@@ -85,7 +86,9 @@ def upload_audio(
     if not image:
         raise HTTPException(status_code=404, detail="Image not found")
     
-    audio_filename = f"audio_{image_id}_{current_user.id}_{audio.filename}"
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+    audio_filename = f"audio_{image_id}_{current_user.id}_{current_time}_{audio.filename}"
+   
     with open(f"uploads/{audio_filename}", "wb") as buffer:
         shutil.copyfileobj(audio.file, buffer)
     
