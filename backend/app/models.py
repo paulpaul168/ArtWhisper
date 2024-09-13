@@ -16,8 +16,9 @@ class Image(Base):
     __tablename__ = "images"
 
     id = Column(Integer, primary_key=True, index=True)
-    filename = Column(String, index=True)
+    url = Column(String, index=True)
     description = Column(String)
+    description_page = Column(String)
     author = Column(String)
 
     audios = relationship("Audio", back_populates="image")

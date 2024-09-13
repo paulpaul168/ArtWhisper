@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form
+from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from . import crud, models, schemas, auth
@@ -30,30 +30,27 @@ async def startup_event():
 
 @app.post("/images", response_model=schemas.Image)
 async def create_image(
-    file: UploadFile = File(...),
-    description: str = Form(...),
-    author: str = Form(...),
+    image: schemas.ImageCreate,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
+    """
+    Internal: Create a new image entry.
+
+    - **image**: Image data including URL, title, description, description page URL, and author
+    """
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Not authorized")
     
-    # Save the uploaded file
-    file_location = f"uploads/{file.filename}"
-    with open(file_location, "wb+") as file_object:
-        shutil.copyfileobj(file.file, file_object)
-    
-    # Create image in database
-    image_data = schemas.ImageCreate(
-        filename=file.filename,
-        description=description,
-        author=author
-    )
-    return crud.create_image(db, image_data)
+    return crud.create_image(db, image)
 
 @app.post("/register", response_model=schemas.User)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    """
+    Register a new user.
+
+    - **user**: User information including username and password
+    """
     db_user = crud.get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
@@ -61,6 +58,11 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @app.post("/token")
 def login(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    """
+    Authenticate a user and return an access token.
+
+    - **user**: User credentials including username and password
+    """
     db_user = crud.get_user_by_username(db, username=user.username)
     if not db_user or not auth.verify_password(user.password, db_user.hashed_password):
         raise HTTPException(
@@ -73,12 +75,22 @@ def login(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 @app.post("/change-password")
 def change_password(new_password: str, current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+    """
+    Change the password for the currently authenticated user.
+
+    - **new_password**: The new password to set
+    """
     current_user.hashed_password = auth.get_password_hash(new_password)
     db.commit()
     return {"message": "Password changed successfully"}
 
 @app.get("/images/{image_id}", response_model=schemas.Image)
 def get_image(image_id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve a specific image by its ID.
+
+    - **image_id**: The ID of the image to retrieve
+    """
     db_image = crud.get_image(db, image_id=image_id)
     if db_image is None:
         raise HTTPException(status_code=404, detail="Image not found")
@@ -91,6 +103,12 @@ def upload_audio(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
+    """
+    Upload an audio file for a specific image.
+
+    - **image_id**: ID of the image to associate the audio with
+    - **audio**: The audio file to upload
+    """
     image = crud.get_image(db, image_id=image_id)
     if not image:
         raise HTTPException(status_code=404, detail="Image not found")
@@ -106,15 +124,35 @@ def upload_audio(
 
 @app.get("/audio/{audio_id}", response_model=schemas.Audio)
 def get_audio(audio_id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve a specific audio entry by its ID.
+
+    - **audio_id**: The ID of the audio to retrieve
+    """
     audio = crud.get_audio(db, audio_id=audio_id)
     if not audio:
         raise HTTPException(status_code=404, detail="Audio not found")
     return audio
 
 @app.get("/image/{image_id}/audios", response_model=list[schemas.Audio])
-def get_audios_for_image(image_id: int, db: Session = Depends(get_db)):
-    return crud.get_audios_for_image(db, image_id=image_id)
+def get_audios_for_image(
+    image_id: int, 
+    db: Session = Depends(get_db),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100)
+):
+    """
+    Retrieve audios for a specific image with pagination.
+
+    - **image_id**: ID of the image to get audios for
+    - **skip**: Number of audios to skip (for pagination)
+    - **limit**: Maximum number of audios to return (for pagination)
+    """
+    return crud.get_audios_for_image(db, image_id=image_id, skip=skip, limit=limit)
 
 @app.get("/user/audios", response_model=list[schemas.Audio])
 def get_user_audios(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+    """
+    Retrieve all audios uploaded by the currently authenticated user.
+    """
     return crud.get_audios_for_user(db, user_id=current_user.id)

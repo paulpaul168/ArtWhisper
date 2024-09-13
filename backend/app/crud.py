@@ -39,8 +39,8 @@ def create_audio(db: Session, audio: schemas.AudioCreate, user_id: int):
 def get_audio(db: Session, audio_id: int):
     return db.query(models.Audio).filter(models.Audio.id == audio_id).first()
 
-def get_audios_for_image(db: Session, image_id: int):
-    return db.query(models.Audio).filter(models.Audio.image_id == image_id).all()
+def get_audios_for_image(db: Session, image_id: int, skip: int = 0, limit: int = 10):
+    return db.query(models.Audio).filter(models.Audio.image_id == image_id).offset(skip).limit(limit).all()
 
 def get_audios_for_user(db: Session, user_id: int):
     return db.query(models.Audio).filter(models.Audio.user_id == user_id).all()
