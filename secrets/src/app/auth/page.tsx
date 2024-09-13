@@ -1,21 +1,38 @@
 'use client';
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useTheme } from "next-themes"
+import { Moon, Sun } from "lucide-react"
 
 export default function AuthPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const { theme, setTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => setMounted(true), [])
 
     const handleSubmit = async (event: React.FormEvent, type: 'login' | 'register') => {
         event.preventDefault()
         // Handle login/register logic here
     }
 
+    if (!mounted) return null
+
     return (
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-screen">
+            <Button
+                variant="outline"
+                size="icon"
+                className="absolute top-4 right-4"
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+                {theme === 'dark' ? <Sun className="h-[1.2rem] w-[1.2rem]" /> : <Moon className="h-[1.2rem] w-[1.2rem]" />}
+                <span className="sr-only">Toggle theme</span>
+            </Button>
             <Card className="w-[350px]">
                 <CardHeader>
                     <CardTitle>Authentication</CardTitle>
