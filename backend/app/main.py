@@ -67,13 +67,6 @@ def change_password(new_password: str, current_user: models.User = Depends(auth.
     db.commit()
     return {"message": "Password changed successfully"}
 
-@app.get("/audio/{image_id}")
-def get_audio(image_id: int, db: Session = Depends(get_db)):
-    image = crud.get_image(db, image_id=image_id)
-    if not image or not image.audio_filename:
-        raise HTTPException(status_code=404, detail="Audio not found")
-    return {"audio_filename": image.audio_filename}
-
 @app.get("/images/{image_id}", response_model=schemas.Image)
 def get_image(image_id: int, db: Session = Depends(get_db)):
     db_image = crud.get_image(db, image_id=image_id)
