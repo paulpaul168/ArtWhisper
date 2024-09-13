@@ -32,4 +32,20 @@ export const register = async (username: string, password: string) => {
     return response.json();
 };
 
+export const fetchAudio = async (image_id: number) => {
+    const response = await fetch(`${API_URL}/image/${image_id}/audios`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (response.status === 404) {
+        throw new Error('Could not find any image with this id');
+      }
+    if (!response.ok) throw new Error('Network response was not ok');
+
+    return response.json();
+};
+
 // Add more API calls as needed
