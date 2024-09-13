@@ -53,20 +53,6 @@ def change_password(new_password: str, current_user: models.User = Depends(auth.
     db.commit()
     return {"message": "Password changed successfully"}
 
-@app.post("/upload-audio/{image_id}")
-def upload_audio(image_id: int, audio: UploadFile = File(...), db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    image = crud.get_image(db, image_id=image_id)
-    if not image:
-        raise HTTPException(status_code=404, detail="Image not found")
-    
-    audio_filename = f"audio_{image_id}_{audio.filename}"
-    with open(f"uploads/{audio_filename}", "wb") as buffer:
-        shutil.copyfileobj(audio.file, buffer)
-    
-    image.audio_filename = audio_filename
-    db.commit()
-    return {"message": "Audio uploaded successfully"}
-
 @app.get("/audio/{image_id}")
 def get_audio(image_id: int, db: Session = Depends(get_db)):
     image = crud.get_image(db, image_id=image_id)
