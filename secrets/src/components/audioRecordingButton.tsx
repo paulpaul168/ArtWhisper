@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button"
 import { Mic, Square } from 'lucide-react'
+import { toast } from 'react-hot-toast';
 
 interface AudioRecordButtonProps {
   onRecordingComplete: (blob: Blob) => void;
@@ -32,6 +33,7 @@ export function AudioRecordButton({ onRecordingComplete }: AudioRecordButtonProp
       setIsRecording(true);
     } catch (error) {
       console.error('Error accessing microphone:', error);
+      toast.error('Error accessing microphone, please allow access to microphone in your browser settings');
     }
   };
 

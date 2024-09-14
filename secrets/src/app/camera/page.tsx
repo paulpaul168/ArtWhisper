@@ -34,7 +34,7 @@ export default function CameraPage() {
                 videoRef.current.srcObject = mediaStream;
             }
         } catch (error) {
-            console.error('Error accessing camera:', error);
+            toast.error('Error accessing camera. Please allow access to camera in your browser settings');
         }
     };
 
