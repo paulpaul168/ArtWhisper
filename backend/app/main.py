@@ -17,18 +17,56 @@ from .database import engine, get_db
 import shutil
 import os
 
+from typing import List
+import tensorflow as tf
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+
+
 models.Base.metadata.create_all(bind=engine)
+
+model = tf.keras.models.load_model('../embedding_generator/art_feature_extractor.h5')
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Adjust this to your frontend URL
+    allow_origins=["http://localhost:3000"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+@app.post("/find-similar-artwork", response_model=schemas.SimilarArtworkResponse)
+async def find_similar_artwork(image: UploadFile = File(...)):
+    contents = await image.read()
+    embedding = await calculate_embedding(contents)
+    
+    all_embeddings = crud.get_all_artwork_embeddings()
+    similarities = cosine_similarity([embedding], [e['embedding'] for e in all_embeddings])[0]
+    
+    most_similar_idx = np.argmax(similarities)
+    most_similar_id = all_embeddings[most_similar_idx]['id']
+    highest_similarity = similarities[most_similar_idx]
+    
+    if highest_similarity >= 0.8:  # You can adjust this threshold
+        return {"similar_artwork_id": most_similar_id, "similarity": float(highest_similarity)}
+    else:
+        return {"similar_artwork_id": None, "similarity": float(highest_similarity)}
+
+async def calculate_embedding(image_contents: bytes) -> List[float]:
+    image = tf.image.decode_image(image_contents, channels=3)
+    image = tf.image.resize(image, (224, 224))
+    image = tf.expand_dims(image, axis=0)
+    image = tf.cast(image, tf.float32) / 255.0
+    
+    embedding = model.predict(image)
+    return np.array(embedding[0]).tolist()
+
+@app.post("/calculate-embedding", response_model=List[float])
+async def calculate_embedding_endpoint(file: UploadFile = File(...)):
+    contents = await file.read()
+    return await calculate_embedding(contents)
 
 @app.on_event("startup")
 async def startup_event():

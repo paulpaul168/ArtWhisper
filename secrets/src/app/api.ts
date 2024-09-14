@@ -126,7 +126,7 @@ export async function uploadAudio(image_id: number, blob: Blob): Promise<number>
     const data = await response.json();
     return data.id;
 }
-    
+
 export async function getArtworkEmbeddings(): Promise<ArtworkEmbedding[]> {
     const response = await fetch(`${API_URL}/artwork-embeddings`, {
         method: 'GET',
@@ -137,6 +137,22 @@ export async function getArtworkEmbeddings(): Promise<ArtworkEmbedding[]> {
 
     if (!response.ok) {
         throw new Error('Failed to fetch artwork embeddings');
+    }
+
+    return response.json();
+}
+
+export async function findSimilarArtwork(imageBlob: Blob): Promise<{ similar_artwork_id: string | null, similarity: number }> {
+    const formData = new FormData();
+    formData.append('image', imageBlob, 'image.jpg');
+
+    const response = await fetch(`${API_URL}/find-similar-artwork`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to find similar artwork');
     }
 
     return response.json();

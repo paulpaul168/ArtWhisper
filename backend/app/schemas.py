@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 class UserCreate(BaseModel):
     username: str
@@ -12,6 +13,10 @@ class ArtworkEmbedding(BaseModel):
 
     class Config:
         from_attributes = True
+
+class SimilarArtworkResponse(BaseModel):
+    similar_artwork_id: Optional[str]
+    similarity: float
 
 class User(BaseModel):
     id: int
