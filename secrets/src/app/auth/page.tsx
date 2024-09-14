@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useTheme } from "next-themes"
 import { Moon, Sun } from "lucide-react"
 import { login, register } from '../api'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'react-hot-toast'
 
 export default function AuthPage() {
@@ -16,6 +16,7 @@ export default function AuthPage() {
     const { theme, setTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
     const router = useRouter()
+    const searchParams = useSearchParams()
 
     useEffect(() => setMounted(true), [])
 
@@ -26,7 +27,8 @@ export default function AuthPage() {
                 const { access_token } = await login(username, password)
                 localStorage.setItem('token', access_token)
                 toast.success('Logged in successfully')
-                router.push('/camera')
+                const destination = searchParams.get('destination') || '/camera'
+                router.push(destination)
             } else {
                 await register(username, password)
                 toast.success('Registered successfully. Please log in.')

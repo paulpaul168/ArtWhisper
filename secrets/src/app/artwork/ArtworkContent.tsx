@@ -137,7 +137,7 @@ export default function ArtworkContent() {
                     </Button>
                 </Link>
                 {!isLoggedIn() ? (
-                    <Link href="/auth"  >
+                    <Link href={`/auth?destination=/artwork?id=${image_id}`}  >
                         <Button variant="outline">
                             <LogIn className="mr-2 h-4 w-4" />Log in
                         </Button>
@@ -149,9 +149,7 @@ export default function ArtworkContent() {
                 )}
             </div>
             <div className="w-full h-auto">
-                {/* <AspectRatio ratio={9 / 9} className="mb-4"> */}
                 <img src={imageDetails.url} alt={imageDetails.title} className="w-full max-h-[100vw] rounded-lg object-cover mb-4" />
-                {/* </AspectRatio> */}
                 <div className="flex flex-row justify-between">
                     <div className="flex-grow">
                         <h2 className="text-xl font-semibold mb-1">
