@@ -114,43 +114,46 @@ export default function ArtworkPage() {
     if (!imageDetails) return <div>No artwork found.</div>;
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen w-full p-4 pb-16 sm:pb-24 max-w-3xl mx-auto">
-            <Card className="w-full mb-8">
-                <CardHeader>
-                    <CardTitle className="text-xl sm:text-2xl">{imageDetails.title}</CardTitle>
-                    <CardDescription className="text-sm sm:text-base">by {imageDetails.artist}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <img src={imageDetails.url} alt={imageDetails.title} className="w-full h-auto mb-4 rounded-lg" />
-                    <p className="text-sm sm:text-base">{imageDetails.description}</p>
-                </CardContent>
-            </Card>
+        <div className="flex flex-col justify-start items-center min-h-screen w-full p-4  max-w-2xl mx-auto">
+            <div className="w-full h-auto">
+                <img src={imageDetails.url} alt={imageDetails.title} className="w-full h-auto mb-4 rounded-lg" />
+                <h2 className="text-xl font-semibold mb-1">
+                    {imageDetails.title}
+                </h2>
+                <span className="text-muted-foreground">by {imageDetails.artist}</span>
+            </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold mb-4">Audio Recordings</h2>
-            {(!audioElements || audioElements.length === 0) ? (
-                <div className="text-center">No audio recordings found for this artwork.</div>
-            ) : (
-                <div className="w-full space-y-4">
-                    {audioElements.map(audioElement => (
-                        <Card key={audioElement.id} className="flex flex-row items-center justify-between w-full mb-4 p-4">
-                            <span className="text-center">Audio Recording {audioElement.id}</span>
-                            <Button
-                                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full p-0"
-                                size="icon"
-                                onClick={() => playAudio(audioElement.id)}
-                            >
-                                {playingAudio === audioElement.id ? (
-                                    <Pause className="h-5 w-5 sm:h-6 sm:w-6" />
-                                ) : (
-                                    <Play className="h-5 w-5 sm:h-6 sm:w-6" />
-                                )}
-                            </Button>
-                        </Card>
-                    ))}
-                </div>
-            )}
-            <div className="m-8">
-            <AudioRecordButton onRecordingComplete={handleRecordingComplete} />
+            <div className="text-center flex-grow flex flex-col justify-center mt-8 w-full">
+                <h2 className="text-xl font-semibold">Audio Recordings</h2>
+                {(!audioElements || audioElements.length === 0) ? (
+                    <div className="text-center text-muted-foreground test-sm mt-1" >
+                        There aren't any audio recordings.
+                        <br />
+                        But you can be the first! 😉
+                    </div>
+                ) : (
+                    <div className="w-full space-y-4 mt-4">
+                        {audioElements.map(audioElement => (
+                            <Card key={audioElement.id} className="flex flex-row items-center justify-between w-full mb-4 p-4">
+                                <span className="text-center">Audio Recording {audioElement.id}</span>
+                                <Button
+                                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full p-0"
+                                    size="icon"
+                                    onClick={() => playAudio(audioElement.id)}
+                                >
+                                    {playingAudio === audioElement.id ? (
+                                        <Pause className="h-5 w-5 sm:h-6 sm:w-6" />
+                                    ) : (
+                                        <Play className="h-5 w-5 sm:h-6 sm:w-6" />
+                                    )}
+                                </Button>
+                            </Card>
+                        ))}
+                    </div>
+                )}
+            </div>
+            <div className="m-4">
+                <AudioRecordButton onRecordingComplete={handleRecordingComplete} />
             </div>
         </div>
     )
