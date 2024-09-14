@@ -44,17 +44,6 @@ database_folder = '../crawler/belvedere_images'
 database_images = load_images_from_folder(database_folder)
 kmeans, index = index_database(database_images)
 
-class ProgressMiniBatchKMeans(MiniBatchKMeans):
-    def fit(self, X, y=None, sample_weight=None):
-        self.n_iter = 100  # Adjust this based on your needs
-        batch_size = min(1000, len(X) // 10)  # Adjust batch size as needed
-        for i in tqdm(range(self.n_iter), desc="MiniBatchKMeans clustering"):
-            if i == 0:
-                super().partial_fit(X, y, sample_weight)
-            else:
-                super().partial_fit(X, y, sample_weight)
-        return self
-
 @app.post("/find-similar-artwork", response_model=schemas.SimilarArtworkResponse)
 async def find_similar_artwork_endpoint(image: UploadFile = File(...)):
     contents = await image.read()

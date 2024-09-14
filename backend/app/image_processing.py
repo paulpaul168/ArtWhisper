@@ -113,19 +113,6 @@ def process_image(image_contents: bytes) -> Tuple[List[np.ndarray], np.ndarray]:
     
     return processed_artworks, image
 
-def calculate_embeddings(image_contents: bytes) -> List[List[float]]:
-    processed_artworks, _ = process_image(image_contents)
-    embeddings = []
-    
-    for artwork in processed_artworks:
-        artwork_tensor = tf.convert_to_tensor(artwork, dtype=tf.float32)
-        artwork_tensor = tf.expand_dims(artwork_tensor, axis=0)
-        artwork_tensor = artwork_tensor / 255.0
-        embedding = model.predict(artwork_tensor)
-        embeddings.append(np.array(embedding[0]).tolist())
-    
-    return embeddings
-
 def find_similar_artwork(query_image: np.ndarray, database_images: List[Tuple[np.ndarray, str]], kmeans, index) -> dict:
     best_match_index = match_artwork(query_image, database_images, kmeans, index)
     
