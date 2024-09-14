@@ -12,7 +12,7 @@ import {
 import { Play, Pause } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect, useRef } from 'react';
-import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl } from "../api";
+import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl, isLoggedIn } from "../api";
 import { AudioRecordButton } from "@/components/audioRecordingButton";
 import AudioWaveform from './AudioWaveform';
 import { toast } from "react-hot-toast";
@@ -160,7 +160,13 @@ export default function ArtworkPage() {
                 )}
             </div>
             <div className="m-4">
-                <AudioRecordButton onRecordingComplete={handleRecordingComplete} />
+                {isLoggedIn() ? (
+                    <AudioRecordButton onRecordingComplete={handleRecordingComplete} />
+                ) : (
+                    <div className="text-center text-muted-foreground test-sm mt-1" >
+                        You are not logged in. Please log in to upload audio.
+                    </div>
+                )}
             </div>
         </div>
     )
