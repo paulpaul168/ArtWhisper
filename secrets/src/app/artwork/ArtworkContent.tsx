@@ -200,11 +200,11 @@ export default function ArtworkContent() {
                         {audioElements.map(audioElement => (
                             <Card key={audioElement.id} className="flex flex-col items-center justify-between w-full mb-4 p-4">
                                 <div className="flex flex-row items-center justify-between w-full">
-                                    <span className="max-w-[22em]">
+                                    <span className="mr-2">
                                         <AudioWaveform audioId={audioElement.id} />
                                     </span>
                                     <Button
-                                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full"
+                                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0 ml-2"
                                         size="icon"
                                         onClick={() => playAudio(audioElement.id)}
                                     >
