@@ -31,7 +31,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from .image_detection import test_find_similar_artwork, load_or_compute_features
+from .image_detection import test_find_similar_artwork, load_or_compute_features, find_similar_artwork_endpoint
 
 @app.on_event("startup")
 async def startup_event():
@@ -48,6 +48,8 @@ async def startup_event():
     print(f"Test result: {test_result}")
 
 @app.post("/find-similar-artwork", response_model=schemas.SimilarArtworkResponse)
+async def find_similar_artwork(image: UploadFile = File(...)):
+    return await find_similar_artwork_endpoint(image)
 
 
 @app.post("/images/{image_id}", response_model=schemas.Image)
