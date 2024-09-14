@@ -48,3 +48,4 @@ ehthumbs.db
 Thumbs.db
 
 backend/uploads/*.ogg
+feature_cache/

@@ -109,15 +109,18 @@ def index_database(database_images, force_recompute=False):
     
     if not force_recompute and os.path.exists(index_file):
         print_debug("Loading pre-computed index")
-        with open(index_file, 'rb') as f:
-            kmeans, index, image_filenames = pickle.load(f)
-        
-        current_filenames = [img[1] for img in database_images]
-        if set(current_filenames) == set(image_filenames):
-            print_debug("Loaded pre-computed index successfully")
-            return kmeans, index
-        else:
-            print_debug("Database has changed, recomputing index")
+        try:
+            with open(index_file, 'rb') as f:
+                kmeans, index, image_filenames = pickle.load(f)
+            
+            current_filenames = [img[1] for img in database_images]
+            if set(current_filenames) == set(image_filenames):
+                print_debug("Loaded pre-computed index successfully")
+                return kmeans, index
+            else:
+                print_debug("Database has changed, recomputing index")
+        except AttributeError:
+            print_debug("Error loading pre-computed index, recomputing")
     
     print_debug("Indexing database")
     start_time = time.time()
