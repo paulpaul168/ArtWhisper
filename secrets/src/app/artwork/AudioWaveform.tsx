@@ -42,7 +42,7 @@ const AudioWaveform = ({ audioId }: { audioId: number }) => {
             ctx.beginPath();
             ctx.moveTo(0, amp);
 
-            for (let i = 0; i < canvas.width; i++) {
+            for (let i = 0; i < canvas.width - 10; i++) {
                 let min = 1.0;
                 let max = -1.0;
                 for (let j = 0; j < step; j++) {
@@ -54,7 +54,7 @@ const AudioWaveform = ({ audioId }: { audioId: number }) => {
                 ctx.lineTo(i, (1 + max) * amp);
             }
 
-            ctx.strokeStyle = 'blue';
+            ctx.strokeStyle = 'grey';
             ctx.stroke();
         }
     }, [audioBuffer]);
@@ -73,15 +73,15 @@ const AudioWaveform = ({ audioId }: { audioId: number }) => {
 
     return (
         <div className="w-full max-w-3xl mx-auto">
-            <canvas ref={canvasRef} width="800" height="200" className="w-full h-auto border border-gray-300" />
-            <div className="mt-4 flex justify-center">
+            <canvas ref={canvasRef} width="800" height="200" className="w-full h-auto border border-gray-300 rounded-full" />
+            {/*<div className="mt-4 flex justify-center">
                 <button
                     onClick={togglePlayPause}
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                 >
                     {isPlaying ? <Pause size={24} /> : <Play size={24} />}
                 </button>
-            </div>
+            </div>*/}
             <audio ref={audioRef} src={getAudioUrl(audioId)} />
         </div>
     );
