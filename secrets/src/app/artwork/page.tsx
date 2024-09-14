@@ -9,12 +9,16 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, ChevronLeft, Info, Camera } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect, useRef } from 'react';
 import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl } from "../api";
 import { AudioRecordButton } from "@/components/audioRecordingButton";
 import AudioWaveform from './AudioWaveform';
+import Link from "next/link";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import Image from "next/image"
+
 
 interface AudioElement {
     id: number;
@@ -115,12 +119,28 @@ export default function ArtworkPage() {
 
     return (
         <div className="flex flex-col justify-start items-center min-h-screen w-full p-4  max-w-lg mx-auto">
+            <div className="w-full mb-4">
+                <Link href="/"  >
+                    <Button variant="secondary">
+                        <Camera className="mr-2 h-4 w-4" />Scan another
+                    </Button>
+                </Link>
+            </div>
             <div className="w-full h-auto">
-                <img src={imageDetails.url} alt={imageDetails.title} className="w-full h-auto mb-4 rounded-lg" />
-                <h2 className="text-xl font-semibold mb-1">
-                    {imageDetails.title}
-                </h2>
-                <span className="text-muted-foreground">by {imageDetails.artist}</span>
+                {/* <AspectRatio ratio={9 / 9} className="mb-4"> */}
+                <img src={imageDetails.url} alt={imageDetails.title} className="w-full max-h-[100vw] rounded-lg object-cover mb-4" />
+                {/* </AspectRatio> */}
+                <div className="flex flex-row justify-between">
+                    <div className="flex-grow">
+                        <h2 className="text-xl font-semibold mb-1">
+                            {imageDetails.title}
+                        </h2>
+                        <span className="text-muted-foreground">by {imageDetails.artist}</span>
+                    </div>
+                    <Button variant="secondary" size="icon">
+                        <Info className="w-4 h-4" />
+                    </Button>
+                </div>
             </div>
 
             <div className="text-center flex-grow flex flex-col justify-center mt-8 w-full">
