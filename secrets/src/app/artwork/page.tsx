@@ -12,7 +12,7 @@ import {
 import { Play } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react';
-import { getAudioForArtwork, getImageForArtwork } from "../api";
+import { getAudioForArtwork, getImageForArtwork, uploadAudio } from "../api";
 import { AudioRecordButton } from "@/components/audioRecordingButton";
 import AudioWaveform from './AudioWaveform';
 
@@ -57,10 +57,19 @@ export default function ArtworkPage() {
         }
     }, [image_id]);
 
-    const handleRecordingComplete = (blob: Blob) => {
-        // Here you would typically upload the blob to your server
+    const handleRecordingComplete = async (blob: Blob) => {
         console.log('Recording completed, blob size:', blob.size);
-        // You might want to add the new recording to audioElements here
+        try {
+            const audioBlob = new Blob([blob], { type: 'audio/wav' }); // Create a new Blob with the correct type
+            if (image_id) {
+                const audioId = await uploadAudio(parseInt(image_id), audioBlob);
+                console.log("Uploaded audio ID:", audioId);
+            } else {
+                console.error("No image ID available");
+            }
+        } catch (error) {
+            console.error("Error uploading audio:", error);
+        }
     };
 
     if (loading) return <div>Loading...</div>;
