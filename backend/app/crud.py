@@ -29,14 +29,10 @@ def create_admin_user(db: Session, username: str, password: str):
 
 
 def create_image(db: Session, image: schemas.ImageCreate, image_id: int):
-    try:
-        db_image = models.Image(id=image_id, **image.dict())
-        db.add(db_image)
-        db.commit()
-        db.refresh(db_image)
-    except sqlalchemy.exc.IntegrityError:
-        raise HTTPException(status_code=409, detail="Item already exists")
-
+    db_image = models.Image(id=image_id, **image.dict())
+    db.add(db_image)
+    db.commit()
+    db.refresh(db_image)
     return db_image
 
 

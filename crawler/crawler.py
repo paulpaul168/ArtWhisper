@@ -1,3 +1,4 @@
+import argparse
 import json
 import requests
 from bs4 import BeautifulSoup
@@ -19,9 +20,10 @@ headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
 }
 session = requests.Session()
+api_session = requests.Session()
 
 
-def crawl_belvedere_collection():
+def crawl_belvedere_collection(single_threaded: bool = False):
     gallery_url = (
         f"{base_url}/objects/images?filter=locationssite:Oberes%20Belvedere;onview:true"
     )
@@ -35,20 +37,30 @@ def crawl_belvedere_collection():
         return
 
     soup = BeautifulSoup(response.content, "html.parser")
-    print("#" + soup.find("span", class_="max-pages").text + "#")
     page_limit = int(
         soup.find("span", class_="max-pages").text[2:].strip().replace(".", "")
     )
 
-    # with concurrent.futures.ThreadPoolExecutor() as executor:
-    #    executor.map(crawl_belvedere_collection_page, range(1, page_limit + 1))
-    for page in range(1, page_limit + 1):
-        crawl_belvedere_collection_page(page)
+    if single_threaded:
+        for page in range(1, page_limit + 1):
+            crawl_belvedere_collection_page(page)
+    else:
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = {
+                executor.submit(crawl_belvedere_collection_page, page): page
+                for page in range(1, page_limit + 1)
+            }
+            for future in concurrent.futures.as_completed(futures):
+                page = futures[future]
+                try:
+                    future.result()
+                except Exception as exc:
+                    logging.error(f"Page {page} generated an exception: {exc}")
+                    raise  # Re-raise the exception to stop execution
 
 
 def crawl_belvedere_collection_page(page: int):
     gallery_url = f"{base_url}/objects/images?filter=locationssite:Oberes%20Belvedere;onview:true&page={page}"
-    print(gallery_url)
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
     }
@@ -135,7 +147,7 @@ def crawl_artwork_page(url, headers):
             "description_page": url,
             "artist": artist,
         }
-        json.dump(cache_data, f)
+        json.dump(cache_data, f, indent=2)
 
     store_artwork(title, artist, description, url, image_url)
 
@@ -157,10 +169,15 @@ def store_artwork(name, artist, description, url, image_url):
         "Authorization": f"Bearer {token}",  # Include the token in the Authorization header
     }
 
-    api_response = session.post(
+    api_response = api_session.post(
         f"http://localhost:8000/images/{id}", headers=api_headers, json=data
     )
-    api_response.raise_for_status()
+    if api_response.status_code == 200:
+        pass
+    elif api_response.status_code == 409:
+        logging.info(f"Artwork {id} already existed on backend")
+    else:
+        api_response.raise_for_status()
 
     # Store the image in a folder
     file_name = f"belvedere_images/{id}.jpeg"
@@ -193,19 +210,29 @@ def login_backend():
     token_headers = {"accept": "application/json", "Content-Type": "application/json"}
 
     # Request token from the token endpoint
-    token_response = requests.post(token_url, headers=token_headers, json=token_data)
+    token_response = api_session.post(token_url, headers=token_headers, json=token_data)
 
     # Check if the request was successful
     if token_response.status_code == 200:
         # Extract token from the response (assuming token is in the 'access_token' field)
         token = token_response.json().get("access_token")
-        print(f"Token obtained: {token}")
+        logging.info(f"Token obtained: {token}")
     else:
-        print(f"Failed to obtain token. Status code: {token_response.status_code}")
-        print(token_response.text)
+        logging.error(
+            f"Failed to obtain token. Status code: {token_response.status_code}"
+        )
+        logging.error(token_response.text)
         exit()
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Crawl the Belvedere Collection")
+    parser.add_argument(
+        "--single-threaded",
+        action="store_true",
+        help="Run the crawler in single-threaded mode (easier for debugging)",
+    )
+    args = parser.parse_args()
+
     login_backend()
-    crawl_belvedere_collection()
+    crawl_belvedere_collection(single_threaded=args.single_threaded)

@@ -1,6 +1,16 @@
-from fastapi import FastAPI, Depends, HTTPException, status, File, UploadFile, Form, Query
+from fastapi import (
+    FastAPI,
+    Depends,
+    HTTPException,
+    status,
+    File,
+    UploadFile,
+    Form,
+    Query,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+import sqlalchemy
 from . import crud, models, schemas, auth
 from datetime import datetime
 from .database import engine, get_db
@@ -19,6 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.on_event("startup")
 async def startup_event():
     db = next(get_db())
@@ -28,12 +39,13 @@ async def startup_event():
     if not existing_admin:
         crud.create_admin_user(db, admin_username, admin_password)
 
+
 @app.post("/images/{image_id}", response_model=schemas.Image)
 async def create_image(
     image_id: int,
     image: schemas.ImageCreate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user),
 ):
     """
     Internal: Create a new image entry with a specific ID.
@@ -43,8 +55,11 @@ async def create_image(
     """
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Not authorized")
-    
-    return crud.create_image(db, image, image_id)
+
+    try:
+        return crud.create_image(db, image, image_id)
+    except sqlalchemy.exc.IntegrityError:
+        raise HTTPException(status_code=409, detail="Item already exists")
 
 
 @app.post("/register", response_model=schemas.User)
@@ -58,6 +73,7 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     return crud.create_user(db=db, user=user)
+
 
 @app.post("/token")
 def login(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -76,8 +92,13 @@ def login(user: schemas.UserCreate, db: Session = Depends(get_db)):
     access_token = auth.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 @app.post("/change-password")
-def change_password(new_password: str, current_user: models.User = Depends(auth.get_current_user), db: Session = Depends(get_db)):
+def change_password(
+    new_password: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db),
+):
     """
     Change the password for the currently authenticated user.
 
@@ -86,6 +107,7 @@ def change_password(new_password: str, current_user: models.User = Depends(auth.
     current_user.hashed_password = auth.get_password_hash(new_password)
     db.commit()
     return {"message": "Password changed successfully"}
+
 
 @app.get("/images/{image_id}", response_model=schemas.Image)
 def get_image(image_id: int, db: Session = Depends(get_db)):
@@ -99,12 +121,13 @@ def get_image(image_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Image not found")
     return db_image
 
+
 @app.post("/upload-audio/{image_id}", response_model=schemas.Audio)
 def upload_audio(
     image_id: int,
     audio: UploadFile = File(...),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_user),
 ):
     """
     Upload an audio file for a specific image.
@@ -115,15 +138,18 @@ def upload_audio(
     image = crud.get_image(db, image_id=image_id)
     if not image:
         raise HTTPException(status_code=404, detail="Image not found")
-    
+
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-    audio_filename = f"audio_{image_id}_{current_user.id}_{current_time}_{audio.filename}"
-   
+    audio_filename = (
+        f"audio_{image_id}_{current_user.id}_{current_time}_{audio.filename}"
+    )
+
     with open(f"uploads/{audio_filename}", "wb") as buffer:
         shutil.copyfileobj(audio.file, buffer)
-    
+
     audio_create = schemas.AudioCreate(filename=audio_filename, image_id=image_id)
     return crud.create_audio(db=db, audio=audio_create, user_id=current_user.id)
+
 
 @app.get("/audio/{audio_id}", response_model=schemas.Audio)
 def get_audio(audio_id: int, db: Session = Depends(get_db)):
@@ -137,12 +163,13 @@ def get_audio(audio_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Audio not found")
     return audio
 
+
 @app.get("/image/{image_id}/audios", response_model=list[schemas.Audio])
 def get_audios_for_image(
-    image_id: int, 
+    image_id: int,
     db: Session = Depends(get_db),
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100)
+    limit: int = Query(10, ge=1, le=100),
 ):
     """
     Retrieve audios for a specific image with pagination.
@@ -153,8 +180,12 @@ def get_audios_for_image(
     """
     return crud.get_audios_for_image(db, image_id=image_id, skip=skip, limit=limit)
 
+
 @app.get("/user/audios", response_model=list[schemas.Audio])
-def get_user_audios(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+def get_user_audios(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(auth.get_current_user),
+):
     """
     Retrieve all audios uploaded by the currently authenticated user.
     """
