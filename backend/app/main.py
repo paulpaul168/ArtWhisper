@@ -151,13 +151,17 @@ def upload_audio(
     audio_create = schemas.AudioCreate(filename=audio_filename, image_id=image_id)
     return crud.create_audio(db=db, audio=audio_create, user_id=current_user.id)
 
-
 @app.get("/audio/{audio_id}")
 def get_audio_file(audio_id: int, db: Session = Depends(get_db)):
     audio = crud.get_audio(db, audio_id=audio_id)
     if not audio:
         raise HTTPException(status_code=404, detail="Audio not found")
-    return audio
+    
+    file_path = f"uploads/{audio.filename}"
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    
+    return FileResponse(file_path, media_type="audio/ogg", filename=audio.filename)
 
 
 @app.get("/image/{image_id}/audios", response_model=list[schemas.Audio])
