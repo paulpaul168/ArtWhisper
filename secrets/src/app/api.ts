@@ -24,7 +24,7 @@ export const login = async (username: string, password: string) => {
     });
 
     if (!response.ok) {
-        throw new Error('Login failed');
+        throw new Error('Username or password is wrong');
     }
 
     return response.json();
@@ -94,6 +94,10 @@ export async function getAudio(id: number): Promise<Blob> {
 
 export function getAudioUrl(id: number): string {
     return `${API_URL}/audio/${id}`;
+}
+
+export function isLoggedIn(): boolean {
+    return localStorage.getItem('token') !== null;
 }
 
 export async function uploadAudio(image_id: number, blob: Blob): Promise<number> {

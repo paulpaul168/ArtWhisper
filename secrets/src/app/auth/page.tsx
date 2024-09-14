@@ -32,8 +32,7 @@ export default function AuthPage() {
                 toast.success('Registered successfully. Please log in.')
             }
         } catch (error) {
-            toast.error('An error occurred. Please try again.')
-            console.error(error)
+            toast.error('Username or password is wrong, please try again.')
         }
     }
 

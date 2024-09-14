@@ -10,11 +10,13 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Play, Pause, Info, Camera } from "lucide-react";
+import { Play, Pause, ChevronLeft, Info, Camera, LogIn, LogOut, Loader2 } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect, useRef } from 'react';
-import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl } from "../api";
+import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl, isLoggedIn } from "../api";
 import { AudioRecordButton } from "@/components/audioRecordingButton";
 import AudioWaveform from './AudioWaveform';
+import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -46,6 +48,11 @@ export default function ArtworkPage() {
     const searchParams = useSearchParams()
     const image_id = searchParams.get('id')
 
+    const logout = () => {
+        localStorage.removeItem('token');
+        window.location.reload();
+    };
+
     const fetchAudioElements = async () => {
         if (image_id) {
             try {
@@ -75,17 +82,23 @@ export default function ArtworkPage() {
 
     const handleRecordingComplete = async (blob: Blob) => {
         console.log('Recording completed, blob size:', blob.size);
+        if (!image_id) {
+            toast.error("No image ID available");
+            return;
+        }
+
         try {
-            const audioBlob = new Blob([blob], { type: 'audio/wav' }); // Create a new Blob with the correct type
-            if (image_id) {
-                const audioId = await uploadAudio(parseInt(image_id), audioBlob);
-                console.log("Uploaded audio ID:", audioId);
-                // Refresh the list of audio recordings
-                await fetchAudioElements();
-            } else {
-                console.error("No image ID available");
-            }
+            const audioBlob = new Blob([blob], { type: 'audio/wav' });
+            const audioId = await uploadAudio(parseInt(image_id), audioBlob);
+            console.log("Uploaded audio ID:", audioId);
+            await fetchAudioElements();
+            toast.success("Audio uploaded successfully");
         } catch (error) {
+            if (error instanceof Error && error.message.includes("Unauthorized")) {
+                toast.error("You are not logged in. Please log in to upload audio.");
+            } else {
+                toast.error("Failed to upload audio. Please try again.");
+            }
             console.error("Error uploading audio:", error);
         }
     };
@@ -112,18 +125,33 @@ export default function ArtworkPage() {
         }
     };
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return (
+        <div className="flex justify-center items-center h-screen">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
     if (error) return <div>Error: {error.message}</div>;
     if (!imageDetails) return <div>No artwork found.</div>;
 
     return (
         <div className="flex flex-col justify-start items-center min-h-screen w-full p-4  max-w-lg mx-auto">
-            <div className="w-full mb-4">
+            <div className="flex flex-row justify-between w-full mb-4">
                 <Link href="/"  >
-                    <Button variant="secondary">
+                    <Button variant="outline">
                         <Camera className="mr-2 h-4 w-4" />Scan another
                     </Button>
                 </Link>
+                {!isLoggedIn() ? (
+                <Link href="/auth"  >
+                    <Button variant="outline">
+                        <LogIn className="mr-2 h-4 w-4" />Log in
+                    </Button>
+                    </Link>
+                ) : (
+                    <Button variant="outline" onClick={() => logout()}>
+                        <LogOut className="mr-2 h-4 w-4" />Log out
+                    </Button>
+                    )}
             </div>
             <div className="w-full h-auto">
                 {/* <AspectRatio ratio={9 / 9} className="mb-4"> */}
@@ -186,7 +214,13 @@ export default function ArtworkPage() {
                 )}
             </div>
             <div className="m-4">
-                <AudioRecordButton onRecordingComplete={handleRecordingComplete} />
+                {isLoggedIn() ? (
+                    <AudioRecordButton onRecordingComplete={handleRecordingComplete} />
+                ) : (
+                    <div className="text-center text-muted-foreground test-sm mt-1" >
+                        You are not logged in. Please log in to upload audio.
+                    </div>
+                )}
             </div>
         </div>
     )
