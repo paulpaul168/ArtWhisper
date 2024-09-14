@@ -101,10 +101,23 @@ export async function uploadAudio(image_id: number, blob: Blob): Promise<number>
     formData.append('audio', blob, 'recording.wav');
     formData.append('image_id', image_id.toString());
 
+    const authToken = localStorage.getItem('token');
+
+    if (!authToken) {
+        throw new Error('No authentication token found');
+    }
+
     const response = await fetch(`${API_URL}/upload-audio/${image_id}`, {
         method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${authToken}` // Add the auth token to the headers
+        },
         body: formData,
     });
+
+    if (response.status === 401) {
+        throw new Error('Unauthorized: Please log in again');
+    }
 
     if (!response.ok) {
         throw new Error('Failed to upload audio');
