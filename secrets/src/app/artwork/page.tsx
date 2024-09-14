@@ -15,6 +15,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl } from "../api";
 import { AudioRecordButton } from "@/components/audioRecordingButton";
 import AudioWaveform from './AudioWaveform';
+import { toast } from "react-hot-toast";
 
 interface AudioElement {
     id: number;
@@ -72,17 +73,23 @@ export default function ArtworkPage() {
 
     const handleRecordingComplete = async (blob: Blob) => {
         console.log('Recording completed, blob size:', blob.size);
+        if (!image_id) {
+            toast.error("No image ID available");
+            return;
+        }
+
         try {
-            const audioBlob = new Blob([blob], { type: 'audio/wav' }); // Create a new Blob with the correct type
-            if (image_id) {
-                const audioId = await uploadAudio(parseInt(image_id), audioBlob);
-                console.log("Uploaded audio ID:", audioId);
-                // Refresh the list of audio recordings
-                await fetchAudioElements();
-            } else {
-                console.error("No image ID available");
-            }
+            const audioBlob = new Blob([blob], { type: 'audio/wav' });
+            const audioId = await uploadAudio(parseInt(image_id), audioBlob);
+            console.log("Uploaded audio ID:", audioId);
+            await fetchAudioElements();
+            toast.success("Audio uploaded successfully");
         } catch (error) {
+            if (error instanceof Error && error.message.includes("Unauthorized")) {
+                toast.error("You are not logged in. Please log in to upload audio.");
+            } else {
+                toast.error("Failed to upload audio. Please try again.");
+            }
             console.error("Error uploading audio:", error);
         }
     };
