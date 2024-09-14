@@ -165,7 +165,7 @@ export default function ArtworkPage() {
                     </div>
                     <div className="item-start">
                         <Dialog >
-                            <DialogTrigger>
+                            <DialogTrigger asChild>
                                 <Button variant="secondary" className="ml-2" size="icon">
                                     <Info className="w-4 h-4" />
                                 </Button>
