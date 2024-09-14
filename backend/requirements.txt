@@ -56,6 +56,7 @@ tensorboard-data-server==0.7.2
 tensorflow==2.17.0
 termcolor==2.4.0
 threadpoolctl==3.5.0
+tqdm==4.66.5
 typing_extensions==4.12.2
 urllib3==2.2.3
 uvicorn==0.30.6
