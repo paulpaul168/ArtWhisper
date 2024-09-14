@@ -43,9 +43,9 @@ async def startup_event():
     if not existing_admin:
         crud.create_admin_user(db, admin_username, admin_password)
      # Run the test function
-    print("Running test function...")
-    test_result = await test_find_similar_artwork()
-    print(f"Test result: {test_result}")
+    #print("Running test function...")
+    #test_result = await test_find_similar_artwork()
+    #print(f"Test result: {test_result}")
 
 @app.post("/find-similar-artwork", response_model=schemas.SimilarArtworkResponse)
 async def find_similar_artwork(image: UploadFile = File(...)):
