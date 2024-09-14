@@ -9,8 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Play, Pause, Info, Camera } from "lucide-react";
-import { Play, Pause, ChevronLeft, Info, Camera, LogIn, LogOut, Loader2 } from "lucide-react";
+import { Play, Pause, Info, Camera, LogIn, LogOut, Loader2 } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect, useRef } from 'react';
 import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl, isLoggedIn } from "../api";
@@ -142,16 +141,16 @@ export default function ArtworkPage() {
                     </Button>
                 </Link>
                 {!isLoggedIn() ? (
-                <Link href="/auth"  >
-                    <Button variant="outline">
-                        <LogIn className="mr-2 h-4 w-4" />Log in
-                    </Button>
+                    <Link href="/auth"  >
+                        <Button variant="outline">
+                            <LogIn className="mr-2 h-4 w-4" />Log in
+                        </Button>
                     </Link>
                 ) : (
                     <Button variant="outline" onClick={() => logout()}>
                         <LogOut className="mr-2 h-4 w-4" />Log out
                     </Button>
-                    )}
+                )}
             </div>
             <div className="w-full h-auto">
                 {/* <AspectRatio ratio={9 / 9} className="mb-4"> */}
