@@ -175,7 +175,7 @@ export default function ArtworkPage() {
                             <DrawerContent>
                                 <DrawerHeader>
                                     <DrawerTitle>About {imageDetails.title}</DrawerTitle>
-                                    <DrawerDescription>{imageDetails.description}</DrawerDescription>
+                                    <DrawerDescription>{imageDetails.description || "No description available"}</DrawerDescription>
                                 </DrawerHeader>
                                 <DrawerFooter className="mb-4">
                                     <Button asChild variant="secondary">
