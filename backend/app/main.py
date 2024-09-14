@@ -20,9 +20,12 @@ import os
 
 from typing import List
 from sklearn.metrics.pairwise import cosine_similarity
+
 import numpy as np
 
-from .image_processing import calculate_embeddings, test_image_processing, find_similar_artwork
+from .image_processing import process_image, find_similar_artwork
+from .image_module import load_images_from_folder, index_database
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -36,18 +39,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Load and index the database images (do this at app startup)
+database_folder = '../crawler/belvedere_images'
+database_images = load_images_from_folder(database_folder)
+kmeans, index = index_database(database_images)
+
 @app.post("/find-similar-artwork", response_model=schemas.SimilarArtworkResponse)
 async def find_similar_artwork_endpoint(image: UploadFile = File(...)):
     contents = await image.read()
-    embeddings = calculate_embeddings(contents)
+    processed_artworks, _ = process_image(contents)
     
-    all_embeddings = crud.get_all_artwork_embeddings()
-    result = find_similar_artwork(embeddings, all_embeddings)
+    best_result = None
+    highest_similarity = -1
+
+    for artwork in processed_artworks:
+        result = find_similar_artwork(artwork, database_images, kmeans, index)
+        if result and result['similarity'] > highest_similarity:
+            best_result = result
+            highest_similarity = result['similarity']
     
-    if result['similarity'] >= 0.7:  # You can adjust this threshold
-        return {"similar_artwork_id": result['similar_artwork_id'], "similarity": result['similarity']}
+    if best_result:
+        return {"similar_artwork_id": best_result['similar_artwork_id'], "similarity": best_result['similarity']}
     else:
-        return {"similar_artwork_id": None, "similarity": result['similarity']}
+        return {"similar_artwork_id": None, "similarity": 0.0}
 
 @app.post("/calculate-embeddings", response_model=List[List[float]])
 async def calculate_embeddings_endpoint(file: UploadFile = File(...)):
@@ -56,7 +70,7 @@ async def calculate_embeddings_endpoint(file: UploadFile = File(...)):
 
 @app.on_event("startup")
 async def startup_event():
-    test_image_processing()
+    #test_image_processing()
     db = next(get_db())
     admin_username = os.getenv("ADMIN_USERNAME", "admin")
     admin_password = os.getenv("ADMIN_PASSWORD", "secret!password")

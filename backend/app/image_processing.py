@@ -6,7 +6,8 @@ import tensorflow as tf
 from . import crud
 from typing import List, Tuple
 from typing import List
-from sklearn.metrics.pairwise import cosine_similarity
+from .image_module import load_or_compute_features, index_database, match_artwork, load_images_from_folder
+
 
 def triplet_loss(y_true, y_pred, alpha=0.2):
     embedding_dim = 128
@@ -20,9 +21,6 @@ def triplet_loss(y_true, y_pred, alpha=0.2):
     basic_loss = pos_dist - neg_dist + alpha
     loss = tf.maximum(basic_loss, 0.0)
     return tf.reduce_mean(loss)
-
-# Load the model (you might want to do this in a way that doesn't load the model multiple times)
-model = tf.keras.models.load_model('../embedding_generator/art_feature_extractor.h5', custom_objects={'triplet_loss': triplet_loss})
 
 def extract_artworks(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -115,40 +113,33 @@ def process_image(image_contents: bytes) -> Tuple[List[np.ndarray], np.ndarray]:
     
     return processed_artworks, image
 
-def calculate_embeddings(image_contents: bytes) -> List[List[float]]:
-    processed_artworks, _ = process_image(image_contents)
-    embeddings = []
+def find_similar_artwork(query_image: np.ndarray, database_images: List[Tuple[np.ndarray, str]], kmeans, index) -> dict:
+    best_match_index = match_artwork(query_image, database_images, kmeans, index)
     
-    for artwork in processed_artworks:
-        artwork_tensor = tf.convert_to_tensor(artwork, dtype=tf.float32)
-        artwork_tensor = tf.expand_dims(artwork_tensor, axis=0)
-        artwork_tensor = artwork_tensor / 255.0
-        embedding = model.predict(artwork_tensor)
-        embeddings.append(np.array(embedding[0]).tolist())
-    
-    return embeddings
-
-def find_similar_artwork(embeddings: List[List[float]], all_embeddings: List[dict]) -> dict:
-    best_match = None
-    highest_similarity = -1
-    
-    for idx, embedding in enumerate(embeddings):
-        similarities = cosine_similarity([embedding], [e['embedding'] for e in all_embeddings])[0]
-        most_similar_idx = np.argmax(similarities)
-        similarity = similarities[most_similar_idx]
-        
-        if similarity > highest_similarity:
-            highest_similarity = similarity
-            best_match = {
-                "artwork_id": idx,
-                "similar_artwork_id": all_embeddings[most_similar_idx]['id'],
-                "similarity": float(similarity)
-            }
-    
-    return best_match
+    if best_match_index is not None:
+        matched_image_name = database_images[best_match_index][1]
+        return {
+            "artwork_id": best_match_index,
+            "similar_artwork_id": matched_image_name,
+            "similarity": 1.0  # We don't have a similarity score from match_artwork, so we use 1.0 for the best match
+        }
+    else:
+        return None
 
 def test_image_processing():
     test_image_folder = 'test_images'
+    database_folder = '../crawler/belvedere_images'
+    
+    # Load database images
+    database_images = load_images_from_folder(database_folder)
+    
+    if not database_images:
+        print(f"No images found in the database folder: {database_folder}")
+        return
+
+    # Index the database
+    kmeans, index = index_database(database_images)
+
     test_image_files = [f for f in os.listdir(test_image_folder) if f.endswith(('.jpg', '.jpeg', '.png'))]
 
     for test_image_file in test_image_files:
@@ -158,27 +149,19 @@ def test_image_processing():
         with open(test_image_path, 'rb') as f:
             image_contents = f.read()
         
-        embeddings = calculate_embeddings(image_contents)
+        processed_artworks, _ = process_image(image_contents)
         
-        print(f"Number of artworks detected: {len(embeddings)}")
-        for idx, embedding in enumerate(embeddings):
-            print(f"Artwork {idx} embedding shape: {len(embedding)}")
-            print(f"First few values: {embedding[:5]}")
+        print(f"Number of artworks detected: {len(processed_artworks)}")
 
-        try:
-            all_embeddings = crud.get_all_artwork_embeddings()
-        except AttributeError:
-            print("Warning: crud.get_all_artwork_embeddings() not found. Using mock data.")
-            all_embeddings = [
-                {"id": i, "embedding": np.random.rand(len(embeddings[0])).tolist()} 
-                for i in range(1, 5)
-            ]
+        for idx, artwork in enumerate(processed_artworks):
+            result = find_similar_artwork(artwork, database_images, kmeans, index)
 
-        result = find_similar_artwork(embeddings, all_embeddings)
+            if result:
+                print(f"\nMost Similar Artwork Found for Artwork {idx}:")
+                print(f"Similar Artwork ID: {result['similar_artwork_id']}")
+                print(f"Similarity: {result['similarity']:.4f}")
+            else:
+                print(f"\nNo match found for Artwork {idx}")
 
-        print("\nMost Similar Artwork Found:")
-        print(f"Detected Artwork ID: {result['artwork_id']}")
-        print(f"Similar Artwork ID: {result['similar_artwork_id']}")
-        print(f"Similarity: {result['similarity']:.4f}")
 if __name__ == "__main__":
     test_image_processing()

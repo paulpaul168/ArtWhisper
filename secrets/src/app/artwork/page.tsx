@@ -9,7 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Play, Pause, ChevronLeft, Info, Camera, LogIn, LogOut, Loader2 } from "lucide-react";
+import { Play, Pause, Info, Camera, LogIn, LogOut, Loader2 } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect, useRef } from 'react';
 import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl, isLoggedIn } from "../api";
@@ -17,8 +17,7 @@ import { AudioRecordButton } from "@/components/audioRecordingButton";
 import AudioWaveform from './AudioWaveform';
 import { toast } from "react-hot-toast";
 import Link from "next/link";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import Image from "next/image"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 
 interface AudioElement {
@@ -142,16 +141,16 @@ export default function ArtworkPage() {
                     </Button>
                 </Link>
                 {!isLoggedIn() ? (
-                <Link href="/auth"  >
-                    <Button variant="outline">
-                        <LogIn className="mr-2 h-4 w-4" />Log in
-                    </Button>
+                    <Link href="/auth"  >
+                        <Button variant="outline">
+                            <LogIn className="mr-2 h-4 w-4" />Log in
+                        </Button>
                     </Link>
                 ) : (
                     <Button variant="outline" onClick={() => logout()}>
                         <LogOut className="mr-2 h-4 w-4" />Log out
                     </Button>
-                    )}
+                )}
             </div>
             <div className="w-full h-auto">
                 {/* <AspectRatio ratio={9 / 9} className="mb-4"> */}
@@ -164,9 +163,23 @@ export default function ArtworkPage() {
                         </h2>
                         <span className="text-muted-foreground">by {imageDetails.artist}</span>
                     </div>
-                    <Button variant="secondary" size="icon">
-                        <Info className="w-4 h-4" />
-                    </Button>
+                    <div className="item-start">
+                        <Dialog >
+                            <DialogTrigger>
+                                <Button variant="secondary" className="ml-2" size="icon">
+                                    <Info className="w-4 h-4" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>About {imageDetails.title}</DialogTitle>
+                                    <DialogDescription>
+                                        {imageDetails.description}
+                                    </DialogDescription>
+                                </DialogHeader>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
             </div>
 
