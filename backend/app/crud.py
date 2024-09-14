@@ -2,7 +2,16 @@ from http.client import HTTPException
 from sqlalchemy.orm import Session
 import sqlalchemy
 from . import models, schemas, auth
+from json import load
 
+def get_all_artwork_embeddings():
+    with open('../embedding_generator/art_embeddings.json', 'r') as f:
+        embeddings = load(f)
+    
+    return [
+        {"id": image_name.split('.')[0], "embedding": embedding}
+        for image_name, embedding in embeddings.items()
+    ]
 
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()

@@ -8,6 +8,11 @@ interface ImageDetails {
     artist: string;
 }
 
+interface ArtworkEmbedding {
+    id: string;
+    embedding: number[];
+}
+
 
 export const login = async (username: string, password: string) => {
     const response = await fetch(`${API_URL}/token`, {
@@ -107,4 +112,18 @@ export async function uploadAudio(image_id: number, blob: Blob): Promise<number>
 
     const data = await response.json();
     return data.id;
+    
+export async function getArtworkEmbeddings(): Promise<ArtworkEmbedding[]> {
+    const response = await fetch(`${API_URL}/artwork-embeddings`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch artwork embeddings');
+    }
+
+    return response.json();
 }

@@ -4,21 +4,80 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
+import * as tf from '@tensorflow/tfjs';
+import * as mobilenet from '@tensorflow-models/mobilenet';
+import { getArtworkEmbeddings } from '@/app/api';
+
+interface ArtworkEmbedding {
+    id: string;
+    embedding: number[];
+}
 
 export default function CameraPage() {
-
     const router = useRouter()
     const videoRef = useRef<HTMLVideoElement>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
+    const [model, setModel] = useState<mobilenet.MobileNet | null>(null);
+    const [artworkEmbeddings, setArtworkEmbeddings] = useState<ArtworkEmbedding[]>([]);
 
     useEffect(() => {
         startCamera();
+        loadModel();
+        fetchArtworkEmbeddings();
         return () => {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
         };
     }, []);
+
+    const loadModel = async () => {
+        const loadedModel = await mobilenet.load();
+        setModel(loadedModel);
+    };
+
+    const fetchArtworkEmbeddings = async () => {
+        try {
+            const embeddings = await getArtworkEmbeddings();
+            setArtworkEmbeddings(embeddings);
+        } catch (error) {
+            console.error('Error fetching artwork embeddings:', error);
+        }
+    };
+
+    const getImageEmbedding = async (imageElement: HTMLImageElement): Promise<number[]> => {
+        if (!model) {
+            throw new Error('Model not loaded');
+        }
+        const tfImg = tf.browser.fromPixels(imageElement);
+        const logits = model.infer(tfImg, true);
+        const embedding = await logits.data();
+        tfImg.dispose();
+        logits.dispose();
+        return Array.from(embedding);
+    };
+
+    const cosineSimilarity = (a: number[], b: number[]): number => {
+        const dotProduct = a.reduce((sum, _, i) => sum + a[i] * b[i], 0);
+        const magnitudeA = Math.sqrt(a.reduce((sum, val) => sum + val * val, 0));
+        const magnitudeB = Math.sqrt(b.reduce((sum, val) => sum + val * val, 0));
+        return dotProduct / (magnitudeA * magnitudeB);
+    };
+
+    const findSimilarArtwork = (embedding: number[], threshold: number = 0.8): string | null => {
+        let mostSimilarArtwork: string | null = null;
+        let highestSimilarity = -1;
+
+        for (const artwork of artworkEmbeddings) {
+            const similarity = cosineSimilarity(embedding, artwork.embedding);
+            if (similarity > highestSimilarity && similarity >= threshold) {
+                highestSimilarity = similarity;
+                mostSimilarArtwork = artwork.id;
+            }
+        }
+
+        return mostSimilarArtwork;
+    };
 
     const startCamera = async () => {
         try {
@@ -32,11 +91,7 @@ export default function CameraPage() {
         }
     };
 
-    const findImageinDatabase = (imageDataUrl: string) => {
-        return 9
-    }
-
-    const captureImage = () => {
+    const captureImage = async () => {
         if (videoRef.current) {
             const canvas = document.createElement('canvas');
             canvas.width = videoRef.current.videoWidth;
@@ -45,8 +100,19 @@ export default function CameraPage() {
             const imageDataUrl = canvas.toDataURL('image/jpeg');
             console.log('Image captured:', imageDataUrl);
 
-            const id = findImageinDatabase(imageDataUrl)
-            router.push(`/artwork?id=${id}`)
+            const img = new Image();
+            img.src = imageDataUrl;
+            await new Promise((resolve) => { img.onload = resolve; });
+
+            const embedding = await getImageEmbedding(img);
+            const similarArtworkId = findSimilarArtwork(embedding);
+
+            if (similarArtworkId) {
+                router.push(`/artwork?id=${similarArtworkId}`);
+            } else {
+                console.log('No matching artwork found');
+                // Handle case when no matching artwork is found
+            }
         }
     };
 
