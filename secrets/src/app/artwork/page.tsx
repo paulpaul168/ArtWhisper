@@ -43,13 +43,24 @@ export default function ArtworkPage() {
     const searchParams = useSearchParams()
     const image_id = searchParams.get('id')
 
+    const fetchAudioElements = async () => {
+        if (image_id) {
+            try {
+                const data = await getAudioForArtwork(parseInt(image_id));
+                setAudioElements(data);
+            } catch (error) {
+                console.error("Error fetching audio elements:", error);
+                setError(error as Error);
+            }
+        }
+    };
+
     useEffect(() => {
         if (image_id) {
             const id = parseInt(image_id);
-            Promise.all([getImageForArtwork(id), getAudioForArtwork(id)])
-                .then(([imageData, audioData]) => {
+            Promise.all([getImageForArtwork(id), fetchAudioElements()])
+                .then(([imageData]) => {
                     setImageDetails(imageData);
-                    setAudioElements(audioData);
                     setLoading(false);
                 })
                 .catch(error => {
@@ -66,6 +77,8 @@ export default function ArtworkPage() {
             if (image_id) {
                 const audioId = await uploadAudio(parseInt(image_id), audioBlob);
                 console.log("Uploaded audio ID:", audioId);
+                // Refresh the list of audio recordings
+                await fetchAudioElements();
             } else {
                 console.error("No image ID available");
             }
