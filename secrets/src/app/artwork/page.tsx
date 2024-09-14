@@ -75,20 +75,22 @@ export default function ArtworkPage() {
 
     const playAudio = (audioId: number) => {
         const audioUrl = getAudioUrl(audioId);
-        const audio = new Audio(audioUrl);
+        let audio = new Audio(audioUrl);
 
         if (playingAudio === audioId) {
             audio.pause();
             setPlayingAudio(null);
         } else {
-            // If another audio is playing, stop it
             if (playingAudio !== null) {
                 const previousAudio = new Audio(getAudioUrl(playingAudio));
                 previousAudio.pause();
             }
-            // Play the new audio
             audio.play();
             setPlayingAudio(audioId);
+
+            audio.addEventListener('ended', () => {
+                setPlayingAudio(null);
+            });
         }
     };
 
