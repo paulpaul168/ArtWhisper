@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
+from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 import numpy as np
 import os
 import json
@@ -12,7 +13,7 @@ def get_embedding(img_path):
     img = load_img(img_path, target_size=(224, 224))
     img_array = img_to_array(img)
     img_array = np.expand_dims(img_array, axis=0)
-    img_array = img_array / 255.0  # Normalize
+    img_array = preprocess_input(img_array)
     return model.predict(img_array).flatten().tolist()
 
 # Generate embeddings for all images
