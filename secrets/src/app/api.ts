@@ -98,7 +98,7 @@ export function getAudioUrl(id: number): string {
 
 export async function uploadAudio(image_id: number, blob: Blob): Promise<number> {
     const formData = new FormData();
-    formData.append('audio', blob, 'recording.wav');
+    formData.append('audio', blob, 'recording.ogg');
     formData.append('image_id', image_id.toString());
 
     const authToken = localStorage.getItem('token');
