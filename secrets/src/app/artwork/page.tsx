@@ -9,10 +9,10 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Play } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect } from 'react';
-import { getAudioForArtwork, getImageForArtwork, uploadAudio } from "../api";
+import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl } from "../api";
 import { AudioRecordButton } from "@/components/audioRecordingButton";
 import AudioWaveform from './AudioWaveform';
 
@@ -37,6 +37,7 @@ export default function ArtworkPage() {
     const [imageDetails, setImageDetails] = useState<ImageDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
+    const [playingAudio, setPlayingAudio] = useState<number | null>(null);
 
     const searchParams = useSearchParams()
     const image_id = searchParams.get('id')
@@ -72,6 +73,25 @@ export default function ArtworkPage() {
         }
     };
 
+    const playAudio = (audioId: number) => {
+        const audioUrl = getAudioUrl(audioId);
+        const audio = new Audio(audioUrl);
+
+        if (playingAudio === audioId) {
+            audio.pause();
+            setPlayingAudio(null);
+        } else {
+            // If another audio is playing, stop it
+            if (playingAudio !== null) {
+                const previousAudio = new Audio(getAudioUrl(playingAudio));
+                previousAudio.pause();
+            }
+            // Play the new audio
+            audio.play();
+            setPlayingAudio(audioId);
+        }
+    };
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error: {error.message}</div>;
     if (!imageDetails) return <div>No artwork found.</div>;
@@ -95,14 +115,18 @@ export default function ArtworkPage() {
             ) : (
                 <div className="w-full space-y-4">
                     {audioElements.map(audioElement => (
-                        <Card key={audioElement.id} className="flex flex-row items-center justify-between w-full p-3 sm:p-4">
-                            <span className="text-sm sm:text-base">Audio Recording {audioElement.id}</span>
-                            <AudioWaveform audioId={audioElement.id} />
+                        <Card key={audioElement.id} className="flex flex-row items-center justify-between w-full mb-4 p-4">
+                            <span className="text-center">Audio Recording {audioElement.id}</span>
                             <Button
                                 className="w-12 h-12 sm:w-14 sm:h-14 rounded-full p-0"
                                 size="icon"
+                                onClick={() => playAudio(audioElement.id)}
                             >
-                                <Play className="h-5 w-5 sm:h-6 sm:w-6" />
+                                {playingAudio === audioElement.id ? (
+                                    <Pause className="h-5 w-5 sm:h-6 sm:w-6" />
+                                ) : (
+                                    <Play className="h-5 w-5 sm:h-6 sm:w-6" />
+                                )}
                             </Button>
                         </Card>
                     ))}

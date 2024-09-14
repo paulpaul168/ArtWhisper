@@ -9,6 +9,7 @@ from fastapi import (
     Query,
 )
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 import sqlalchemy
 from . import crud, models, schemas, auth
@@ -231,17 +232,17 @@ def upload_audio(
     return crud.create_audio(db=db, audio=audio_create, user_id=current_user.id)
 
 
-@app.get("/audio/{audio_id}", response_model=schemas.Audio)
-def get_audio(audio_id: int, db: Session = Depends(get_db)):
-    """
-    Retrieve a specific audio entry by its ID.
-
-    - **audio_id**: The ID of the audio to retrieve
-    """
+@app.get("/audio/{audio_id}")
+def get_audio_file(audio_id: int, db: Session = Depends(get_db)):
     audio = crud.get_audio(db, audio_id=audio_id)
     if not audio:
         raise HTTPException(status_code=404, detail="Audio not found")
-    return audio
+    
+    file_path = f"uploads/{audio.filename}"  # Adjust this path
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    
+    return FileResponse(file_path, media_type="audio/ogg", filename=audio.filename)
 
 
 @app.get("/image/{image_id}/audios", response_model=list[schemas.Audio])
