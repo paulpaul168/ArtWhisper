@@ -4,7 +4,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Camera, Loader } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { getArtworkEmbeddings, findSimilarArtwork } from '@/app/api';
+import { findSimilarArtwork } from '@/app/api';
 import { toast } from 'react-hot-toast';
 
 export default function CameraPage() {
