@@ -33,7 +33,7 @@ export default function CameraPage() {
     };
 
     const findImageinDatabase = (imageDataUrl: string) => {
-        return 3
+        return 9
     }
 
     const captureImage = () => {
