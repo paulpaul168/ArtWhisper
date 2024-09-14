@@ -37,6 +37,48 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+async def find_similar_artworks():
+    # Load a test image directly
+    test_image_path = '../crawler/belvedere_images/178.jpeg'
+    
+    # Check if the file exists
+    if not os.path.exists(test_image_path):
+        raise HTTPException(status_code=404, detail=f"Test image not found at {test_image_path}")
+    
+    # Try to read the image
+    image = cv2.imread(test_image_path)
+    if image is None:
+        raise HTTPException(status_code=400, detail=f"Failed to read image at {test_image_path}")
+    
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    
+    # Convert the image to bytes
+    _, buffer = cv2.imencode('.jpg', image)
+    image_bytes = buffer.tobytes()
+
+   # Crop the image to 50% lower right corner (instead of 25%)
+    h, w = image.shape[:2]
+    cropped_image = image[h//2:, w//2:]
+    
+    # Convert the cropped image to bytes
+    _, buffer = cv2.imencode('.jpg', cropped_image)
+    image_bytes = buffer.tobytes()
+    
+    embedding = await calculate_embedding(image_bytes)
+    
+    all_embeddings = crud.get_all_artwork_embeddings()
+    similarities = cosine_similarity([embedding], [e['embedding'] for e in all_embeddings])[0]
+    
+    most_similar_idx = np.argmax(similarities)
+    most_similar_id = all_embeddings[most_similar_idx]['id']
+    highest_similarity = similarities[most_similar_idx]
+    
+    if highest_similarity >= 0.6:  # You can adjust this threshold
+        return {"similar_artwork_id": most_similar_id, "similarity": float(highest_similarity)}
+    else:
+        return {"similar_artwork_id": None, "similarity": float(highest_similarity)}
+
+
 @app.post("/find-similar-artwork", response_model=schemas.SimilarArtworkResponse)
 async def find_similar_artwork(image: UploadFile = File(...)):
     contents = await image.read()
@@ -49,7 +91,7 @@ async def find_similar_artwork(image: UploadFile = File(...)):
     most_similar_id = all_embeddings[most_similar_idx]['id']
     highest_similarity = similarities[most_similar_idx]
     
-    if highest_similarity >= 0.8:  # You can adjust this threshold
+    if highest_similarity >= 0.7:  # You can adjust this threshold
         return {"similar_artwork_id": most_similar_id, "similarity": float(highest_similarity)}
     else:
         return {"similar_artwork_id": None, "similarity": float(highest_similarity)}
