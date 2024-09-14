@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card"
 import { Play, Pause } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl } from "../api";
 import { AudioRecordButton } from "@/components/audioRecordingButton";
 import AudioWaveform from './AudioWaveform';
@@ -38,6 +38,7 @@ export default function ArtworkPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
     const [playingAudio, setPlayingAudio] = useState<number | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     const searchParams = useSearchParams()
     const image_id = searchParams.get('id')
@@ -75,22 +76,23 @@ export default function ArtworkPage() {
 
     const playAudio = (audioId: number) => {
         const audioUrl = getAudioUrl(audioId);
-        let audio = new Audio(audioUrl);
 
         if (playingAudio === audioId) {
-            audio.pause();
+            // Pause the currently playing audio
+            audioRef.current?.pause();
             setPlayingAudio(null);
         } else {
-            if (playingAudio !== null) {
-                const previousAudio = new Audio(getAudioUrl(playingAudio));
-                previousAudio.pause();
-            }
-            audio.play();
-            setPlayingAudio(audioId);
+            // Stop the previously playing audio (if any)
+            audioRef.current?.pause();
 
-            audio.addEventListener('ended', () => {
-                setPlayingAudio(null);
-            });
+            // Create and play the new audio
+            const newAudio = new Audio(audioUrl);
+            newAudio.addEventListener('ended', () => setPlayingAudio(null));
+            newAudio.play();
+
+            // Update the audioRef and playingAudio state
+            audioRef.current = newAudio;
+            setPlayingAudio(audioId);
         }
     };
 
