@@ -114,7 +114,7 @@ export default function ArtworkPage() {
     if (!imageDetails) return <div>No artwork found.</div>;
 
     return (
-        <div className="flex flex-col justify-start items-center min-h-screen w-full p-4  max-w-2xl mx-auto">
+        <div className="flex flex-col justify-start items-center min-h-screen w-full p-4  max-w-lg mx-auto">
             <div className="w-full h-auto">
                 <img src={imageDetails.url} alt={imageDetails.title} className="w-full h-auto mb-4 rounded-lg" />
                 <h2 className="text-xl font-semibold mb-1">
