@@ -3,6 +3,8 @@ const API_URL =
     ? process.env.NEXT_PUBLIC_API_URL
     : window.location.origin + "/api";
 
+import { jwtDecode } from 'jwt-decode';
+
 interface ImageDetails {
   id: number;
   url: string;
@@ -99,7 +101,17 @@ export function getAudioUrl(id: number): string {
 }
 
 export function isLoggedIn(): boolean {
-  return localStorage.getItem("token") !== null;
+  const token = localStorage.getItem("token");
+  if (!token) return false;
+
+  try {
+    const decodedToken: any = jwtDecode(token);
+    const currentTime = Date.now() / 1000; // Convert to seconds
+    return decodedToken.exp > currentTime;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return false;
+  }
 }
 
 export async function uploadAudio(
