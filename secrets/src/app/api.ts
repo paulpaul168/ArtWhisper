@@ -90,3 +90,21 @@ export async function getAudio(id: number): Promise<Blob> {
 export function getAudioUrl(id: number): string {
     return `${API_URL}/audio/${id}`;
 }
+
+export async function uploadAudio(image_id: number, blob: Blob): Promise<number> {
+    const formData = new FormData();
+    formData.append('audio', blob, 'recording.wav');
+    formData.append('image_id', image_id.toString());
+
+    const response = await fetch(`${API_URL}/upload-audio/${image_id}`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to upload audio');
+    }
+
+    const data = await response.json();
+    return data.id;
+}
