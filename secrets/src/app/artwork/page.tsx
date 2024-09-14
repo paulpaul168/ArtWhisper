@@ -9,15 +9,14 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Play, Pause, ChevronLeft, Info, Camera } from "lucide-react";
+import { Play, Pause, Info, Camera } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect, useRef } from 'react';
 import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl } from "../api";
 import { AudioRecordButton } from "@/components/audioRecordingButton";
 import AudioWaveform from './AudioWaveform';
 import Link from "next/link";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import Image from "next/image"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 
 interface AudioElement {
@@ -137,9 +136,23 @@ export default function ArtworkPage() {
                         </h2>
                         <span className="text-muted-foreground">by {imageDetails.artist}</span>
                     </div>
-                    <Button variant="secondary" size="icon">
-                        <Info className="w-4 h-4" />
-                    </Button>
+                    <div className="item-start">
+                        <Dialog >
+                            <DialogTrigger>
+                                <Button variant="secondary" className="ml-2" size="icon">
+                                    <Info className="w-4 h-4" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>About {imageDetails.title}</DialogTitle>
+                                    <DialogDescription>
+                                        {imageDetails.description}
+                                    </DialogDescription>
+                                </DialogHeader>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
             </div>
 
