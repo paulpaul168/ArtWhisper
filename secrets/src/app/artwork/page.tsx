@@ -18,6 +18,7 @@ import AudioWaveform from './AudioWaveform';
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 
 
 interface AudioElement {
@@ -165,28 +166,26 @@ export default function ArtworkPage() {
                         <span className="text-muted-foreground">by {imageDetails.artist}</span>
                     </div>
                     <div className="item-start">
-                        <Dialog >
-                            <DialogTrigger asChild>
+                        <Drawer>
+                            <DrawerTrigger asChild>
                                 <Button variant="secondary" className="ml-2" size="icon">
                                     <Info className="w-4 h-4" />
                                 </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>About {imageDetails.title}</DialogTitle>
-                                    <DialogDescription>
-                                        {imageDetails.description}
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter>
+                            </DrawerTrigger>
+                            <DrawerContent>
+                                <DrawerHeader>
+                                    <DrawerTitle>About {imageDetails.title}</DrawerTitle>
+                                    <DrawerDescription>{imageDetails.description}</DrawerDescription>
+                                </DrawerHeader>
+                                <DrawerFooter className="mb-4">
                                     <Button asChild variant="secondary">
                                         <Link href={imageDetails.description_page}>
                                             <Earth className="w-4 h-4 mr-2" />
                                             More on the belvedere page</Link>
                                     </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+                                </DrawerFooter>
+                            </DrawerContent>
+                        </Drawer>
                     </div>
                 </div>
             </div>
@@ -229,6 +228,6 @@ export default function ArtworkPage() {
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     )
 }
