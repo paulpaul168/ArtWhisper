@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import * as tf from '@tensorflow/tfjs';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import { getArtworkEmbeddings } from '@/app/api';
+import { toast } from 'react-hot-toast';
 
 interface ArtworkEmbedding {
     id: string;
@@ -19,6 +20,7 @@ export default function CameraPage() {
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [model, setModel] = useState<mobilenet.MobileNet | null>(null);
     const [artworkEmbeddings, setArtworkEmbeddings] = useState<ArtworkEmbedding[]>([]);
+    const [isModelLoading, setIsModelLoading] = useState(true);
 
     useEffect(() => {
         startCamera();
@@ -32,8 +34,18 @@ export default function CameraPage() {
     }, []);
 
     const loadModel = async () => {
-        const loadedModel = await mobilenet.load();
-        setModel(loadedModel);
+        try {
+            setIsModelLoading(true);
+            console.log('Starting to load MobileNet model...');
+            const loadedModel = await mobilenet.load();
+            console.log('MobileNet model loaded successfully');
+            setModel(loadedModel);
+        } catch (error) {
+            console.error('Error loading MobileNet model:', error);
+            toast.error('Failed to load image recognition model');
+        } finally {
+            setIsModelLoading(false);
+        }
     };
 
     const fetchArtworkEmbeddings = async () => {
@@ -49,6 +61,7 @@ export default function CameraPage() {
         if (!model) {
             throw new Error('Model not loaded');
         }
+        console.log("Model loaded");
         const tfImg = tf.browser.fromPixels(imageElement);
         const logits = model.infer(tfImg, true);
         const embedding = await logits.data();
@@ -92,6 +105,11 @@ export default function CameraPage() {
     };
 
     const captureImage = async () => {
+        if (!model) {
+            console.error('Model not loaded yet');
+            toast.error('Image recognition model not ready. Please try again.');
+            return;
+        }
         if (videoRef.current) {
             const canvas = document.createElement('canvas');
             canvas.width = videoRef.current.videoWidth;
@@ -105,13 +123,14 @@ export default function CameraPage() {
             await new Promise((resolve) => { img.onload = resolve; });
 
             const embedding = await getImageEmbedding(img);
+            console.log(embedding);
             const similarArtworkId = findSimilarArtwork(embedding);
 
             if (similarArtworkId) {
                 router.push(`/artwork?id=${similarArtworkId}`);
             } else {
                 console.log('No matching artwork found');
-                // Handle case when no matching artwork is found
+                toast.error('No matching artwork found');
             }
         }
     };
@@ -128,9 +147,15 @@ export default function CameraPage() {
                 onClick={captureImage}
                 className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full p-0"
                 size="icon"
+                disabled={isModelLoading}
             >
                 <Camera className="h-6 w-6" />
             </Button>
+            {isModelLoading && (
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white px-4 py-2 rounded">
+                    Loading model...
+                </div>
+            )}
         </div>
     );
 }
