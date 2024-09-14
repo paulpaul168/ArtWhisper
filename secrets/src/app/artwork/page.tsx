@@ -9,7 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Play, Pause, Info, Camera, LogIn, LogOut, Loader2 } from "lucide-react";
+import { Play, Pause, Info, Camera, LogIn, LogOut, Loader2, Earth } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect, useRef } from 'react';
 import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl, isLoggedIn } from "../api";
@@ -17,7 +17,7 @@ import { AudioRecordButton } from "@/components/audioRecordingButton";
 import AudioWaveform from './AudioWaveform';
 import { toast } from "react-hot-toast";
 import Link from "next/link";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 
 interface AudioElement {
@@ -33,6 +33,7 @@ interface ImageDetails {
     url: string;
     title: string;
     description: string;
+    description_page: string;
     artist: string;
 }
 
@@ -165,7 +166,7 @@ export default function ArtworkPage() {
                     </div>
                     <div className="item-start">
                         <Dialog >
-                            <DialogTrigger>
+                            <DialogTrigger asChild>
                                 <Button variant="secondary" className="ml-2" size="icon">
                                     <Info className="w-4 h-4" />
                                 </Button>
@@ -177,6 +178,13 @@ export default function ArtworkPage() {
                                         {imageDetails.description}
                                     </DialogDescription>
                                 </DialogHeader>
+                                <DialogFooter>
+                                    <Button asChild variant="secondary">
+                                        <Link href={imageDetails.description_page}>
+                                            <Earth className="w-4 h-4 mr-2" />
+                                            More on the belvedere page</Link>
+                                    </Button>
+                                </DialogFooter>
                             </DialogContent>
                         </Dialog>
                     </div>
