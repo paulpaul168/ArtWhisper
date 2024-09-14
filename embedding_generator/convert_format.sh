@@ -11,4 +11,4 @@ source venv/bin/activate
 # Install requirements
 pip install -r requirements.txt
 
-tensorflowjs_converter --input_format keras art_recognition_model.h5 tfjs_model
+tensorflowjs_converter --input_format keras art_feature_extractor.h5 tfjs_model
