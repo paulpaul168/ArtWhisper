@@ -6,6 +6,13 @@ class UserCreate(BaseModel):
     password: str
     is_admin: bool = False
 
+class ArtworkEmbedding(BaseModel):
+    id: str
+    embedding: list[float]
+
+    class Config:
+        from_attributes = True
+
 class User(BaseModel):
     id: int
     username: str

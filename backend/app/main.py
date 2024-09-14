@@ -190,3 +190,10 @@ def get_user_audios(
     Retrieve all audios uploaded by the currently authenticated user.
     """
     return crud.get_audios_for_user(db, user_id=current_user.id)
+
+@app.get("/artwork-embeddings", response_model=list[schemas.ArtworkEmbedding])
+def get_artwork_embeddings():
+    """
+    Retrieve embeddings for all artworks.
+    """
+    return crud.get_all_artwork_embeddings()
