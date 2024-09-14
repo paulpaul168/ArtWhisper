@@ -112,6 +112,7 @@ export async function uploadAudio(image_id: number, blob: Blob): Promise<number>
 
     const data = await response.json();
     return data.id;
+}
     
 export async function getArtworkEmbeddings(): Promise<ArtworkEmbedding[]> {
     const response = await fetch(`${API_URL}/artwork-embeddings`, {
