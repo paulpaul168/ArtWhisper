@@ -9,7 +9,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Play, Pause, ChevronLeft, Info, Camera } from "lucide-react";
+import { Play, Pause, ChevronLeft, Info, Camera, LogIn, LogOut, Loader2 } from "lucide-react";
 import { useSearchParams } from 'next/navigation'
 import React, { useState, useEffect, useRef } from 'react';
 import { getAudioForArtwork, getImageForArtwork, uploadAudio, getAudioUrl, isLoggedIn } from "../api";
@@ -47,6 +47,11 @@ export default function ArtworkPage() {
 
     const searchParams = useSearchParams()
     const image_id = searchParams.get('id')
+
+    const logout = () => {
+        localStorage.removeItem('token');
+        window.location.reload();
+    };
 
     const fetchAudioElements = async () => {
         if (image_id) {
@@ -120,18 +125,33 @@ export default function ArtworkPage() {
         }
     };
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return (
+        <div className="flex justify-center items-center h-screen">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
     if (error) return <div>Error: {error.message}</div>;
     if (!imageDetails) return <div>No artwork found.</div>;
 
     return (
         <div className="flex flex-col justify-start items-center min-h-screen w-full p-4  max-w-lg mx-auto">
-            <div className="w-full mb-4">
+            <div className="flex flex-row justify-between w-full mb-4">
                 <Link href="/"  >
-                    <Button variant="secondary">
+                    <Button variant="outline">
                         <Camera className="mr-2 h-4 w-4" />Scan another
                     </Button>
                 </Link>
+                {!isLoggedIn() ? (
+                <Link href="/auth"  >
+                    <Button variant="outline">
+                        <LogIn className="mr-2 h-4 w-4" />Log in
+                    </Button>
+                    </Link>
+                ) : (
+                    <Button variant="outline" onClick={() => logout()}>
+                        <LogOut className="mr-2 h-4 w-4" />Log out
+                    </Button>
+                    )}
             </div>
             <div className="w-full h-auto">
                 {/* <AspectRatio ratio={9 / 9} className="mb-4"> */}

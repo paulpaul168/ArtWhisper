@@ -24,7 +24,7 @@ export const login = async (username: string, password: string) => {
     });
 
     if (!response.ok) {
-        throw new Error('Login failed');
+        throw new Error('Username or password is wrong');
     }
 
     return response.json();
