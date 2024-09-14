@@ -84,11 +84,11 @@ def load_or_compute_features():
 async def find_similar_artwork_endpoint(image: UploadFile = File(...)):
     print(f"Received image: {image.filename}")
     
-    temp_image_path = "temp_uploaded_image.jpg"
-    with open(temp_image_path, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
+     # Read the image file into memory
+    image_bytes = await image.read()
+    nparr = np.frombuffer(image_bytes, np.uint8)
+    query_image = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
     
-    query_image = cv2.imread(temp_image_path, cv2.IMREAD_GRAYSCALE)
     if query_image is None:
         raise HTTPException(status_code=400, detail="Invalid image file")
     
@@ -107,8 +107,6 @@ async def find_similar_artwork_endpoint(image: UploadFile = File(...)):
         results = list(executor.map(match_painting, cached_paintings.items()))
     
     best_match, best_score = max(results, key=lambda x: x[1])
-    
-    os.remove(temp_image_path)
     
     if best_match:
         print(f"Final result: Best match {best_match.stem} with similarity {best_score}")
