@@ -1,13 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Play, Pause } from 'lucide-react';
 import { getAudio, getAudioUrl } from '../api';
 
 const AudioWaveform = ({ audioId }: { audioId: number }) => {
     const canvasRef = useRef(null);
     const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
 
     const audioRef = useRef<HTMLAudioElement>(null);
+
 
 
 
@@ -16,7 +15,7 @@ const AudioWaveform = ({ audioId }: { audioId: number }) => {
             const response = await getAudio(Number(audioId));
             const blob = await response;
             const arrayBuffer = await blob.arrayBuffer();
-            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
             const buffer = await audioContext.decodeAudioData(arrayBuffer);
             setAudioBuffer(buffer);
         };
@@ -58,18 +57,6 @@ const AudioWaveform = ({ audioId }: { audioId: number }) => {
             ctx.stroke();
         }
     }, [audioBuffer]);
-
-    const togglePlayPause = () => {
-        if (audioRef.current) {
-            if (audioRef.current.paused) {
-                audioRef.current.play();
-                setIsPlaying(true);
-            } else {
-                audioRef.current.pause();
-                setIsPlaying(false);
-            }
-        }
-    };
 
     return (
         <div className="w-full max-w-3xl mx-auto">
