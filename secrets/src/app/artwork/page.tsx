@@ -202,11 +202,8 @@ export default function ArtworkPage() {
                     <div className="w-full space-y-4 mt-4">
                         {audioElements.map(audioElement => (
                             <Card key={audioElement.id} className="flex flex-col items-center justify-between w-full mb-4 p-4">
-                                <div className="flex flex-col items-center justify-center">
-                                    <span className="text-center">Audio Recording {audioElement.id}</span>
-                                </div>
-                                <div className="flex flex-row items-center justify-between mt-4">
-                                    <span className="mr-4 max-w-[15em]">
+                                <div className="flex flex-row items-center w-full justify-between">
+                                    <span className="mr-4 max-w-[22em]">
                                         <AudioWaveform audioId={audioElement.id} />
                                     </span>
                                     <Button

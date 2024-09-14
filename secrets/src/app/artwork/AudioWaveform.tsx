@@ -73,7 +73,7 @@ const AudioWaveform = ({ audioId }: { audioId: number }) => {
 
     return (
         <div className="w-full max-w-3xl mx-auto">
-            <canvas ref={canvasRef} width="800" height="200" className="w-full h-auto border border-gray-300 rounded-full" />
+            <canvas ref={canvasRef} width="800" height="200" className="w-full h-auto" />
             {/*<div className="mt-4 flex justify-center">
                 <button
                     onClick={togglePlayPause}
