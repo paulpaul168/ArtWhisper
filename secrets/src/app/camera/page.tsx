@@ -34,7 +34,9 @@ export default function CameraPage() {
                 videoRef.current.srcObject = mediaStream;
             }
         } catch (error) {
-            toast.error('Error accessing camera. Please allow access to camera in your browser settings');
+            toast.error('Error accessing camera. Please allow access to camera in your browser settings', {
+                id: 'camera-error',
+            });
         }
     };
 
@@ -63,7 +65,6 @@ export default function CameraPage() {
                 }
             }, 'image/jpeg');
         } catch (error) {
-            console.error('Error capturing or processing image:', error);
             toast.error('An error occurred. Please try again.');
         }
     };
