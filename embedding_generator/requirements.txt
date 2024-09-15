@@ -1,9 +1,0 @@
-tensorflow[and-cuda]
-tensorflowjs
-numpy
-Pillow
-matplotlib
-scikit-learn
-tensorflow-io
-pillow
-pandas
