@@ -1,12 +1,12 @@
-import { Suspense } from 'react';
-import dynamic from 'next/dynamic';
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
 
-const AudioContent = dynamic(() => import('./AudioContent'), { ssr: false });
+const AudioContent = dynamic(() => import("./AudioContent"), { ssr: false });
 
 export default function AudioPage() {
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <AudioContent />
-        </Suspense>
-    );
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AudioContent />
+    </Suspense>
+  );
 }

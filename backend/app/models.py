@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime, f
 from sqlalchemy.orm import relationship
 from .database import Base
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -11,6 +12,7 @@ class User(Base):
     is_admin = Column(Boolean, default=False)
 
     audios = relationship("Audio", back_populates="user")
+
 
 class Image(Base):
     __tablename__ = "images"
@@ -23,6 +25,7 @@ class Image(Base):
     artist = Column(String)
 
     audios = relationship("Audio", back_populates="image")
+
 
 class Audio(Base):
     __tablename__ = "audios"

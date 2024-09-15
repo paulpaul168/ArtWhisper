@@ -3,7 +3,7 @@ const API_URL =
     ? process.env.NEXT_PUBLIC_API_URL
     : window.location.origin + "/api";
 
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 
 interface ImageDetails {
   id: number;
@@ -116,7 +116,7 @@ export function isLoggedIn(): boolean {
 
 export async function uploadAudio(
   image_id: number,
-  blob: Blob
+  blob: Blob,
 ): Promise<number> {
   const formData = new FormData();
   formData.append("audio", blob, "recording.ogg");
@@ -164,7 +164,7 @@ export async function getArtworkEmbeddings(): Promise<ArtworkEmbedding[]> {
 }
 
 export async function findSimilarArtwork(
-  imageBlob: Blob
+  imageBlob: Blob,
 ): Promise<{ similar_artwork_id: string | null; similarity: number }> {
   const formData = new FormData();
   formData.append("image", imageBlob, "image.jpg");

@@ -1,13 +1,15 @@
-import React, { useState, useRef } from 'react';
-import { Button } from "@/components/ui/button"
-import { Mic, Square } from 'lucide-react'
-import { toast } from 'react-hot-toast';
+import React, { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Mic, Square } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 interface AudioRecordButtonProps {
   onRecordingComplete: (blob: Blob) => void;
 }
 
-export function AudioRecordButton({ onRecordingComplete }: AudioRecordButtonProps) {
+export function AudioRecordButton({
+  onRecordingComplete,
+}: AudioRecordButtonProps) {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -16,7 +18,7 @@ export function AudioRecordButton({ onRecordingComplete }: AudioRecordButtonProp
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
-      
+
       mediaRecorderRef.current.ondataavailable = (event) => {
         if (event.data.size > 0) {
           chunksRef.current.push(event.data);
@@ -24,7 +26,7 @@ export function AudioRecordButton({ onRecordingComplete }: AudioRecordButtonProp
       };
 
       mediaRecorderRef.current.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
         onRecordingComplete(blob);
         chunksRef.current = [];
       };
@@ -32,8 +34,10 @@ export function AudioRecordButton({ onRecordingComplete }: AudioRecordButtonProp
       mediaRecorderRef.current.start();
       setIsRecording(true);
     } catch (error) {
-      console.error('Error accessing microphone:', error);
-      toast.error('Error accessing microphone, please allow access to microphone in your browser settings');
+      console.error("Error accessing microphone:", error);
+      toast.error(
+        "Error accessing microphone, please allow access to microphone in your browser settings",
+      );
     }
   };
 

@@ -8,7 +8,9 @@ same masterpiece.
  
 ## Build it locally
 
-To build it you need bash, node, python and docker installed on your system.
+To build it you need bash, [node](https://nodejs.org/), 
+[python](https://www.python.org/), and 
+[docker](https://www.docker.com/) installed on your system.
 
 First start the postgres database and the backend with:
 ```bash
@@ -32,3 +34,11 @@ npm run dev
 
 Now the frontend should be running on [localhost:3000](http://localhost:3000)
 and the backend on [localhost:8000](http://localhost:8000). 🎉
+
+## Development
+
+Contributions are quite welcome, you are awesome 🎉😊.
+
+For python code we use [ruff](https://github.com/astral-sh/ruff) or 
+[black](https://github.com/psf/black) (both compatible) to format the code and
+for typescript we use [prettier](https://prettier.io/).

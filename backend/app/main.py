@@ -5,7 +5,6 @@ from fastapi import (
     status,
     File,
     UploadFile,
-    Form,
     Query,
 )
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +16,10 @@ from datetime import datetime
 from .database import engine, get_db
 import shutil
 import os
+from .image_detection import (
+    load_or_compute_features,
+    find_similar_artwork_endpoint,
+)
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -25,13 +28,12 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"], 
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-from .image_detection import test_find_similar_artwork, load_or_compute_features, find_similar_artwork_endpoint
 
 @app.on_event("startup")
 async def startup_event():
@@ -42,10 +44,11 @@ async def startup_event():
     existing_admin = crud.get_user_by_username(db, admin_username)
     if not existing_admin:
         crud.create_admin_user(db, admin_username, admin_password)
-     # Run the test function
-    #print("Running test function...")
-    #test_result = await test_find_similar_artwork()
-    #print(f"Test result: {test_result}")
+    # Run the test function
+    # print("Running test function...")
+    # test_result = await test_find_similar_artwork()
+    # print(f"Test result: {test_result}")
+
 
 @app.post("/find-similar-artwork", response_model=schemas.SimilarArtworkResponse)
 async def find_similar_artwork(image: UploadFile = File(...)):
@@ -67,12 +70,14 @@ async def create_image(
     except sqlalchemy.exc.IntegrityError:
         raise HTTPException(status_code=409, detail="Item already exists")
 
+
 @app.post("/register", response_model=schemas.User)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="Username already registered")
     return crud.create_user(db=db, user=user)
+
 
 @app.post("/token")
 def login(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -86,6 +91,7 @@ def login(user: schemas.UserCreate, db: Session = Depends(get_db)):
     access_token = auth.create_access_token(data={"sub": user.username})
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 @app.post("/change-password")
 def change_password(
     new_password: str,
@@ -96,12 +102,14 @@ def change_password(
     db.commit()
     return {"message": "Password changed successfully"}
 
+
 @app.get("/images/{image_id}", response_model=schemas.Image)
 def get_image(image_id: int, db: Session = Depends(get_db)):
     db_image = crud.get_image(db, image_id=image_id)
     if db_image is None:
         raise HTTPException(status_code=404, detail="Image not found")
     return db_image
+
 
 @app.post("/upload-audio/{image_id}", response_model=schemas.Audio)
 def upload_audio(
@@ -125,17 +133,19 @@ def upload_audio(
     audio_create = schemas.AudioCreate(filename=audio_filename, image_id=image_id)
     return crud.create_audio(db=db, audio=audio_create, user_id=current_user.id)
 
+
 @app.get("/audio/{audio_id}")
 def get_audio_file(audio_id: int, db: Session = Depends(get_db)):
     audio = crud.get_audio(db, audio_id=audio_id)
     if not audio:
         raise HTTPException(status_code=404, detail="Audio not found")
-    
+
     file_path = f"uploads/{audio.filename}"
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Audio file not found")
-    
+
     return FileResponse(file_path, media_type="audio/ogg", filename=audio.filename)
+
 
 @app.get("/image/{image_id}/audios", response_model=list[schemas.Audio])
 def get_audios_for_image(
@@ -146,12 +156,14 @@ def get_audios_for_image(
 ):
     return crud.get_audios_for_image(db, image_id=image_id, skip=skip, limit=limit)
 
+
 @app.get("/user/audios", response_model=list[schemas.Audio])
 def get_user_audios(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_user),
 ):
     return crud.get_audios_for_user(db, user_id=current_user.id)
+
 
 @app.get("/artwork-embeddings", response_model=list[schemas.ArtworkEmbedding])
 def get_artwork_embeddings():

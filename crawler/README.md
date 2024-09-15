@@ -6,6 +6,7 @@ will not be stored in the database but are used to build our custom
 classification system to do artwork detection on mobile devices.
 
 ## Caching
+
 The crawler does some aggressive caching, and stores all metatdata in 
 `belvedere_data` and the images in `belvedere_images`.
 
@@ -18,8 +19,8 @@ In case you want to invalidate the cache run:
 rm belvedere_data/*.json
 rm belvedere_images/*.jpeg
 ```
-
 ## Single Threaded mode
+
 The output of the crawler can be a bit confusing since it runs concurrently by 
 default. For debugging purposes you can force it to a single thread with:
 

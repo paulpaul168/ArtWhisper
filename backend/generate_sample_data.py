@@ -10,14 +10,23 @@ from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Database connection
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/museum_db")
+SQLALCHEMY_DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql://user:password@localhost:5432/museum_db"
+)
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def get_or_create_user(db: SessionLocal, username: str, password: str, is_admin: bool = False):
+
+def get_or_create_user(
+    db: SessionLocal, username: str, password: str, is_admin: bool = False
+):
     user = db.query(User).filter(User.username == username).first()
     if not user:
-        user = User(username=username, hashed_password=get_password_hash(password), is_admin=is_admin)
+        user = User(
+            username=username,
+            hashed_password=get_password_hash(password),
+            is_admin=is_admin,
+        )
         db.add(user)
         db.commit()
         db.refresh(user)
@@ -25,6 +34,7 @@ def get_or_create_user(db: SessionLocal, username: str, password: str, is_admin:
     else:
         print(f"User already exists: {username}")
     return user
+
 
 def add_example_data():
     db = SessionLocal()
@@ -43,22 +53,22 @@ def add_example_data():
                 title="Mona Lisa",
                 description="The Mona Lisa is an oil painting by Italian artist, inventor, and writer Leonardo da Vinci. Likely completed in 1506, the piece features a portrait of a seated woman set against an imaginary landscape.",
                 description_page="https://en.wikipedia.org/wiki/Mona_Lisa",
-                artist="Leonardo da Vinci"
+                artist="Leonardo da Vinci",
             ),
             Image(
                 url="https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1200px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg",
                 title="The Starry Night",
                 description="The Starry Night is an oil-on-canvas painting by the Dutch Post-Impressionist painter Vincent van Gogh. Painted in June 1889, it depicts the view from the east-facing window of his asylum room at Saint-Rémy-de-Provence, just before sunrise, with the addition of an imaginary village.",
                 description_page="https://en.wikipedia.org/wiki/The_Starry_Night",
-                artist="Vincent van Gogh"
+                artist="Vincent van Gogh",
             ),
             Image(
                 url="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Scream.jpg/1200px-The_Scream.jpg",
                 title="The Scream",
                 description="The Scream is the popular name given to a composition created by Norwegian Expressionist artist Edvard Munch in 1893. The agonized face in the painting has become one of the most iconic images of art, seen as symbolizing the anxiety of the human condition.",
                 description_page="https://en.wikipedia.org/wiki/The_Scream",
-                artist="Edvard Munch"
-            )
+                artist="Edvard Munch",
+            ),
         ]
 
         # Check if images already exist
@@ -79,13 +89,17 @@ def add_example_data():
 
         # Add audio entries
         for image in images:
-            existing_audio = db.query(Audio).filter(Audio.image_id == image.id, Audio.user_id == regular_user.id).first()
+            existing_audio = (
+                db.query(Audio)
+                .filter(Audio.image_id == image.id, Audio.user_id == regular_user.id)
+                .first()
+            )
             if not existing_audio:
                 audio = Audio(
                     filename=f"{image.title.lower().replace(' ', '_')}_audio.mp3",
                     user_id=regular_user.id,
                     image_id=image.id,
-                    created_at=datetime.utcnow()
+                    created_at=datetime.utcnow(),
                 )
                 db.add(audio)
                 print(f"Added new audio for: {image.title}")
@@ -101,6 +115,7 @@ def add_example_data():
         db.rollback()
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     add_example_data()

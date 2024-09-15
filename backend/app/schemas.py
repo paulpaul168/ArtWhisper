@@ -2,10 +2,12 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
+
 class UserCreate(BaseModel):
     username: str
     password: str
     is_admin: bool = False
+
 
 class ArtworkEmbedding(BaseModel):
     id: str
@@ -14,24 +16,28 @@ class ArtworkEmbedding(BaseModel):
     class Config:
         from_attributes = True
 
+
 class SimilarArtworkResponse(BaseModel):
     similar_artwork_id: Optional[str]
     similarity: float
 
+
 class User(BaseModel):
     id: int
     username: str
-    is_admin: bool 
+    is_admin: bool
 
     class Config:
         from_attributes = True
 
+
 class ImageCreate(BaseModel):
     url: str
-    title: str  
+    title: str
     description: str
-    description_page: str 
+    description_page: str
     artist: str
+
 
 class Image(ImageCreate):
     id: int
@@ -39,9 +45,11 @@ class Image(ImageCreate):
     class Config:
         from_attributes = True
 
+
 class AudioCreate(BaseModel):
     filename: str
     image_id: int
+
 
 class Audio(AudioCreate):
     id: int
@@ -50,6 +58,7 @@ class Audio(AudioCreate):
 
     class Config:
         from_attributes = True
+
 
 class Token(BaseModel):
     access_token: str

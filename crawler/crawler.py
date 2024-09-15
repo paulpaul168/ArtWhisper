@@ -4,8 +4,6 @@ import requests
 from bs4 import BeautifulSoup
 import os
 from urllib.parse import urljoin
-import urllib.request
-import time
 import concurrent.futures
 import logging
 
