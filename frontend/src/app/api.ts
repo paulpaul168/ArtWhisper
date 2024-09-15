@@ -18,6 +18,27 @@ interface ArtworkEmbedding {
   embedding: number[];
 }
 
+interface DecodedToken {
+  // Registered claims
+  iss?: string;  // Issuer
+  sub?: string;  // Subject (usually user ID)
+  aud?: string | string[];  // Audience
+  exp: number;  // Expiration time (in seconds since Unix epoch)
+  nbf?: number;  // Not before time
+  iat?: number;  // Issued at time
+  jti?: string;  // JWT ID
+
+  // Public claims
+  name?: string;
+  email?: string;
+  roles?: string[];
+
+  // Private claims (examples, adjust as needed for your application)
+  userId?: number;
+  username?: string;
+  // Add any other custom claims your application uses
+}
+
 export const login = async (username: string, password: string) => {
   const response = await fetch(`${API_URL}/token`, {
     method: "POST",
@@ -105,7 +126,7 @@ export function isLoggedIn(): boolean {
   if (!token) return false;
 
   try {
-    const decodedToken: any = jwtDecode(token);
+    const decodedToken = jwtDecode<DecodedToken>(token);
     const currentTime = Date.now() / 1000; // Convert to seconds
     return decodedToken.exp > currentTime;
   } catch (error) {
