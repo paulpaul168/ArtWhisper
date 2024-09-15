@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useRef, useState, useEffect } from "react";
-import { Camera, Loader } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { findSimilarArtwork } from "@/app/api";
 import { toast } from "react-hot-toast";
@@ -11,7 +10,7 @@ export default function CameraPage() {
   const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showLoading, setShowLoading] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
   const captureImage = async () => {
@@ -20,7 +19,7 @@ export default function CameraPage() {
       return;
     }
 
-    setIsLoading(true);
+    setShowLoading(true);
     try {
       const canvas = document.createElement("canvas");
       canvas.width = videoRef.current.videoWidth;
@@ -41,12 +40,12 @@ export default function CameraPage() {
         } else {
           toast.error("Failed to capture image");
         }
-        setIsLoading(false);
+        setTimeout(() => setShowLoading(false), 300);
         setCapturedImage(null);
       }, "image/jpeg");
     } catch (error) {
       toast.error("An error occurred. Please try again.");
-      setIsLoading(false);
+      setTimeout(() => setShowLoading(false), 300);
       setCapturedImage(null);
     }
   };
@@ -85,7 +84,10 @@ export default function CameraPage() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden">
+    <div
+      className="fixed inset-0 w-full h-full overflow-hidden"
+      onClick={captureImage}
+    >
       {capturedImage ? (
         <img
           src={capturedImage}
@@ -100,18 +102,22 @@ export default function CameraPage() {
           className="absolute top-0 left-0 w-full h-full object-cover"
         />
       )}
-      <Button
-        onClick={captureImage}
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-16 h-16 rounded-full p-0"
-        size="icon"
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <Loader className="h-6 w-6 animate-spin" />
-        ) : (
-          <Camera className="h-6 w-6" />
-        )}
-      </Button>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-64 h-64 relative flex items-center justify-center">
+          <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white rounded-tl-lg"></div>
+          <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white rounded-tr-lg"></div>
+          <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white rounded-bl-lg"></div>
+          <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white rounded-br-lg"></div>
+          {showLoading ? (
+            <Loader className="h-8 w-8 text-white animate-spin" />
+          ) : (
+            <p className="text-white text-xl font-semibold opacity-70">
+              Click to scan
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="absolute inset-0 bg-black opacity-0 pointer-events-none" />
     </div>
   );
 }

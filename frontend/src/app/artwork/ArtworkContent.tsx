@@ -3,8 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
-  Play,
-  Pause,
   Info,
   Camera,
   LogIn,
@@ -13,12 +11,11 @@ import {
   Earth,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   getAudioForArtwork,
   getImageForArtwork,
   uploadAudio,
-  getAudioUrl,
   isLoggedIn,
 } from "../api";
 import { AudioRecordButton } from "@/components/audioRecordingButton";
@@ -59,8 +56,6 @@ export default function ArtworkContent() {
   const [imageDetails, setImageDetails] = useState<ImageDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [playingAudio, setPlayingAudio] = useState<number | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const searchParams = useSearchParams();
   const image_id = searchParams.get("id");
@@ -117,28 +112,6 @@ export default function ArtworkContent() {
         toast.error("Failed to upload audio. Please try again.");
       }
       console.error("Error uploading audio:", error);
-    }
-  };
-
-  const playAudio = (audioId: number) => {
-    const audioUrl = getAudioUrl(audioId);
-
-    if (playingAudio === audioId) {
-      // Pause the currently playing audio
-      audioRef.current?.pause();
-      setPlayingAudio(null);
-    } else {
-      // Stop the previously playing audio (if any)
-      audioRef.current?.pause();
-
-      // Create and play the new audio
-      const newAudio = new Audio(audioUrl);
-      newAudio.addEventListener("ended", () => setPlayingAudio(null));
-      newAudio.play();
-
-      // Update the audioRef and playingAudio state
-      audioRef.current = newAudio;
-      setPlayingAudio(audioId);
     }
   };
 
@@ -236,17 +209,6 @@ export default function ArtworkContent() {
                   <span className="mr-2">
                     <AudioWaveform audioId={audioElement.id} />
                   </span>
-                  <Button
-                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0 ml-2"
-                    size="icon"
-                    onClick={() => playAudio(audioElement.id)}
-                  >
-                    {playingAudio === audioElement.id ? (
-                      <Pause className="h-5 w-5 sm:h-6 sm:w-6" />
-                    ) : (
-                      <Play className="h-5 w-5 sm:h-6 sm:w-6" />
-                    )}
-                  </Button>
                 </div>
               </Card>
             ))}
