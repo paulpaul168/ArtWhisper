@@ -44,10 +44,36 @@ async def startup_event():
     existing_admin = crud.get_user_by_username(db, admin_username)
     if not existing_admin:
         crud.create_admin_user(db, admin_username, admin_password)
+
+    reload_audio_database(db)
     # Run the test function
     # print("Running test function...")
     # test_result = await test_find_similar_artwork()
     # print(f"Test result: {test_result}")
+
+
+def reload_audio_database(db: Session):
+    # Delete all existing audio entries
+    db.query(models.Audio).delete()
+    db.commit()
+
+    # Get all audio files from the uploads folder
+    uploads_folder = "uploads"
+    audio_files = [f for f in os.listdir(uploads_folder) if f.startswith("audio_")]
+
+    # Reload audio files into the database
+    for audio_file in audio_files:
+        # Extract information from the filename
+        parts = audio_file.split("_")
+        if len(parts) >= 4:
+            image_id = int(parts[1])
+            user_id = int(parts[2])
+
+            # Create new audio entry
+            audio_create = schemas.AudioCreate(filename=audio_file, image_id=image_id)
+            crud.create_audio(db=db, audio=audio_create, user_id=user_id)
+
+    print(f"Reloaded {len(audio_files)} audio files into the database.")
 
 
 @app.post("/find-similar-artwork", response_model=schemas.SimilarArtworkResponse)
