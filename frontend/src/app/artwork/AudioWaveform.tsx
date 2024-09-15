@@ -70,13 +70,22 @@ const AudioWaveform = ({ audioId }: { audioId: number }) => {
   }, [isPlaying]);
 
   const togglePlayPause = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
     if (currentTime >= duration) {
+      // If the audio has finished, reset to the beginning
       setCurrentTime(0);
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-      }
+      audio.currentTime = 0;
+      audio.play();
+      setIsPlaying(true);
+    } else if (isPlaying) {
+      audio.pause();
+      setIsPlaying(false);
+    } else {
+      audio.play();
+      setIsPlaying(true);
     }
-    setIsPlaying(!isPlaying);
   };
 
   const drawWaveform = () => {
@@ -156,7 +165,6 @@ const AudioWaveform = ({ audioId }: { audioId: number }) => {
         className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0 ml-2"
         size="icon"
         onClick={togglePlayPause}
-        disabled={currentTime >= duration && !isPlaying}
       >
         {isPlaying ? (
           <Pause className="h-5 w-5 sm:h-6 sm:w-6" />
