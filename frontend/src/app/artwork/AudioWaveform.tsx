@@ -111,7 +111,7 @@ const AudioWaveform = ({ audioId }: { audioId: number }) => {
     ctx.beginPath();
     ctx.moveTo(0, amp);
 
-    for (let i = 0; i < canvas.width; i++) {
+    for (let i = 0; i < canvas.width - 10; i++) {
       let min = 1.0;
       let max = -1.0;
       for (let j = 0; j < step; j++) {
@@ -133,7 +133,7 @@ const AudioWaveform = ({ audioId }: { audioId: number }) => {
     ctx.beginPath();
     ctx.moveTo(0, amp);
 
-    for (let i = 0; i < progressWidth; i++) {
+    for (let i = 0; i < progressWidth - 10; i++) {
       let min = 1.0;
       let max = -1.0;
       for (let j = 0; j < step; j++) {
