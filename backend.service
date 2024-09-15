@@ -1,0 +1,14 @@
+[Unit]
+Description=Museum Backend Service
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/root/GameJamBelvedere2024/backend
+ExecStart=/bin/bash /root/GameJamBelvedere2024/backend/start.sh
+Restart=always
+RestartSec=10
+Environment=DATABASE_URL=postgresql://user:password@localhost:5432/museum_db
+
+[Install]
+WantedBy=multi-user.target
