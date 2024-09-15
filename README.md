@@ -1,6 +1,6 @@
 # ArtWhisper
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot.jpg)
 
 [Live Website](https://artwhisper.paulhoeller.at/)
 
