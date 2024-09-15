@@ -5,7 +5,7 @@
 
 Art Whisper is a unique social experiment to emmers yourself deeply into 
 culture. Listening to the thoughts previous visitors had as they inspected the 
-same masterpiece.
+same masterpiece. Created in 48hrs during the CultureGameJam 2024 🥳
  
 ## Build it locally
 
