@@ -1,0 +1,14 @@
+[Unit]
+Description=Node.js Production Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/GameJamBelvedere2024/frontend
+ExecStart=npm start
+Restart=on-failure
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target

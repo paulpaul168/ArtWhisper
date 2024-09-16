@@ -154,27 +154,32 @@ const AudioWaveform = ({ audioId }: { audioId: number }) => {
   }, [currentTime, audioBuffer, theme]);
 
   return (
-    <div className="w-full flex items-center justify-between">
-      <canvas
-        ref={canvasRef}
-        width="600"
-        height="100"
-        className="w-full h-auto"
-      />
-      <Button
-        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0 ml-2"
-        size="icon"
-        onClick={togglePlayPause}
-      >
-        {isPlaying ? (
-          <Pause className="h-5 w-5 sm:h-6 sm:w-6" />
-        ) : (
-          <Play className="h-5 w-5 sm:h-6 sm:w-6" />
-        )}
-      </Button>
+    <div className="w-full">
+      <div className="flex items-center">
+        <div className="flex-grow mr-4">
+          <canvas
+            ref={canvasRef}
+            width="600"
+            height="100"
+            className="w-full h-auto"
+          />
+        </div>
+        <Button
+          className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full"
+          size="icon"
+          onClick={togglePlayPause}
+        >
+          {isPlaying ? (
+            <Pause className="h-4 w-4 sm:h-5 sm:w-5" />
+          ) : (
+            <Play className="h-4 w-4 sm:h-5 sm:w-5" />
+          )}
+        </Button>
+      </div>
       <audio ref={audioRef} src={getAudioUrl(audioId)} />
     </div>
   );
-};
+
+}
 
 export default AudioWaveform;
